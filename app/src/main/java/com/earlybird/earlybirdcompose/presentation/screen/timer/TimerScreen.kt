@@ -61,7 +61,6 @@ fun TimerScreen(){
         modifier = Modifier
             .fillMaxSize()
             .background(brush = backgroundColor)
-            .padding(WindowInsets.systemBars.asPaddingValues())
     ){
         SlideInImage()
         Column(

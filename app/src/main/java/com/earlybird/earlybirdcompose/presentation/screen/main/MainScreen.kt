@@ -1,9 +1,12 @@
 package com.earlybird.earlybirdcompose.presentation.screen.main
 
+import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -38,6 +41,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat.startActivityForResult
+import androidx.core.content.ContextCompat.startForegroundService
 import com.earlybird.earlybirdcompose.R
 import com.earlybird.earlybirdcompose.presentation.screen.timer.OverlayService
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdComposeTheme
@@ -53,7 +58,6 @@ fun MainScreen(
     onSettingClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
-    val intent = Intent(context, OverlayService::class.java)
     val backgroundColor = Brush.verticalGradient(
         colors = listOf(Color(0xFFEAF7FA), Color(0xFF8CE6FF))
     )
@@ -150,24 +154,7 @@ fun MainScreen(
                         iconColor = EarlyBirdTheme.colors.white,
                         onClick = {
                             //TimerScreen은 백그라운드 작업 또는 시스템 오버레이를 위해 사용되기 때문에 Navigation을 사용못함
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                if (Settings.canDrawOverlays(context)) {
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                        context.startForegroundService(intent)
-                                    } else {
-                                        context.startService(intent)
-                                    }
-                                } else {
-                                    // 권한이 없으면 설정 화면으로 이동
-                                    val settingsIntent = Intent(
-                                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                                        Uri.parse("package:${context.packageName}")
-                                    )
-                                    context.startActivity(settingsIntent)
-                                }
-                            } else {
-                                context.startService(intent)
-                            }
+                            checkPermission(context)
                         }
                     )
                 }
@@ -216,6 +203,42 @@ fun getTodayDateFormatted(): String {
     val today = LocalDate.now()
     val formatter = DateTimeFormatter.ofPattern("M월 d일 E요일", Locale.KOREAN)
     return today.format(formatter)
+}
+
+fun checkPermission(context: Context) {
+    Log.d("MainScreen", "checkPermission() 호출됨")
+    
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {  // 마시멜로우 이상일 경우
+        Log.d("MainScreen", "Android M 이상 버전")
+        if (!Settings.canDrawOverlays(context)) {  // 오버레이 권한 체크
+            Log.d("MainScreen", "오버레이 권한이 없음 - 권한 요청 화면으로 이동")
+            val intent = Intent(
+                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                Uri.parse("package:${context.packageName}")
+            )
+            (context as Activity).startActivityForResult(intent, 0)
+        } else {
+            Log.d("MainScreen", "오버레이 권한 있음 - OverlayService 시작")
+            val serviceIntent = Intent(context, OverlayService::class.java)
+            try {
+                context.startService(serviceIntent)
+                Log.d("MainScreen", "OverlayService 시작 요청 완료")
+            } catch (e: Exception) {
+                Log.e("MainScreen", "OverlayService 시작 실패: ${e.message}")
+                e.printStackTrace()
+            }
+        }
+    } else {
+        Log.d("MainScreen", "Android M 미만 버전 - OverlayService 시작")
+        val serviceIntent = Intent(context, OverlayService::class.java)
+        try {
+            context.startService(serviceIntent)
+            Log.d("MainScreen", "OverlayService 시작 요청 완료")
+        } catch (e: Exception) {
+            Log.e("MainScreen", "OverlayService 시작 실패: ${e.message}")
+            e.printStackTrace()
+        }
+    }
 }
 
 @Preview(showBackground = true)
