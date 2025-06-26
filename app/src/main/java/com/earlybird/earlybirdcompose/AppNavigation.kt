@@ -3,11 +3,10 @@ package com.earlybird.earlybirdcompose
 import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.earlybird.earlybirdcompose.presentation.screen.main.MainScreen
 import com.earlybird.earlybirdcompose.presentation.screen.main.navigation.mainGraph
-import com.earlybird.earlybirdcompose.presentation.screen.splash.navigation.splashScreen
+import com.earlybird.earlybirdcompose.presentation.screen.splash.navigation.splashGraph
+import com.earlybird.earlybirdcompose.presentation.screen.timer.navigation.timerGraph
 
 @Composable
 fun AppNavigation(startIntent: Intent){
@@ -17,7 +16,7 @@ fun AppNavigation(startIntent: Intent){
         navController = navController,
         startDestination = "splash"
     ) {
-        splashScreen(
+        splashGraph(
             navController = navController,
             startIntent = startIntent,
             navigateToLogin = {
@@ -31,12 +30,13 @@ fun AppNavigation(startIntent: Intent){
                 }
             }
         )
-//        composable("login") { LoginScreen() }
-        composable("main") {
-            mainGraph(
-                navController = navController,
-                startIntent = startIntent,
-            )
-        }
+        mainGraph(
+            navController = navController,
+            startIntent = startIntent,
+        )
+        timerGraph(
+            navController = navController,
+            startIntent = startIntent,
+        )
     }
 }

@@ -1,6 +1,11 @@
 package com.earlybird.earlybirdcompose
 
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -16,6 +21,8 @@ import com.earlybird.earlybirdcompose.presentation.screen.main.MainScreen
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdComposeTheme
 import kotlinx.coroutines.MainScope
 
+const val REQUEST_CODE_OVERLAY_PERMISSION = 1001
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,11 +30,32 @@ class MainActivity : ComponentActivity() {
 
         val startIntent = intent
 
+        if (!checkOverlayPermission(this)) {
+            requestOverlayPermission(this)
+        }
+
         setContent {
             EarlyBirdComposeTheme {
                 AppNavigation(startIntent)
             }
         }
+    }
+}
+
+fun checkOverlayPermission(activity: Activity): Boolean {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        Settings.canDrawOverlays(activity)
+    } else {
+        true
+    }
+}
+fun requestOverlayPermission(activity: Activity) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(activity)) {
+        val intent = Intent(
+            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+            Uri.parse("package:${activity.packageName}")
+        )
+        activity.startActivityForResult(intent, REQUEST_CODE_OVERLAY_PERMISSION)
     }
 }
 

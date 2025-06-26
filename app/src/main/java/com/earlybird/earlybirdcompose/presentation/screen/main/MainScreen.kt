@@ -1,5 +1,9 @@
 package com.earlybird.earlybirdcompose.presentation.screen.main
 
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import android.provider.Settings
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -28,12 +32,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.earlybird.earlybirdcompose.R
+import com.earlybird.earlybirdcompose.presentation.screen.timer.OverlayService
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdComposeTheme
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdTheme
 import java.time.LocalDate
@@ -46,6 +52,8 @@ fun MainScreen(
     onStartNowClick: () -> Unit = {},
     onSettingClick: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+    val intent = Intent(context, OverlayService::class.java)
     val backgroundColor = Brush.verticalGradient(
         colors = listOf(Color(0xFFEAF7FA), Color(0xFF8CE6FF))
     )
@@ -140,7 +148,27 @@ fun MainScreen(
                         backgroundColor = Color.White,
                         textColor = EarlyBirdTheme.colors.mainBlue,
                         iconColor = EarlyBirdTheme.colors.white,
-                        onClick = onStartNowClick
+                        onClick = {
+                            //TimerScreen은 백그라운드 작업 또는 시스템 오버레이를 위해 사용되기 때문에 Navigation을 사용못함
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                if (Settings.canDrawOverlays(context)) {
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                        context.startForegroundService(intent)
+                                    } else {
+                                        context.startService(intent)
+                                    }
+                                } else {
+                                    // 권한이 없으면 설정 화면으로 이동
+                                    val settingsIntent = Intent(
+                                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                        Uri.parse("package:${context.packageName}")
+                                    )
+                                    context.startActivity(settingsIntent)
+                                }
+                            } else {
+                                context.startService(intent)
+                            }
+                        }
                     )
                 }
             }
@@ -184,61 +212,12 @@ fun MainActionButton(
     }
 }
 
-@Composable
-fun HeaderSection() {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 48.dp) // 설정 버튼 아래
-            .background(
-                color = Color.White,
-                shape = RoundedCornerShape(20.dp)
-            ),
-    ) {
-        Text(
-            text = "6월 18일 수요일",
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.DarkGray
-        )
-        ChatBubble(text = "나는 할 일을 미루지 않는 사람이 될거야!", isLeft = true, color = Color(0xFF0288D1), textColor = Color.White)
-    }
-}
-
 fun getTodayDateFormatted(): String {
     val today = LocalDate.now()
     val formatter = DateTimeFormatter.ofPattern("M월 d일 E요일", Locale.KOREAN)
     return today.format(formatter)
 }
 
-
-@Composable
-fun ChatBubble(
-    text: String,
-    isLeft: Boolean = true,
-    color: Color = if (isLeft) Color(0xFFE0F7FA) else Color(0xFFFFFFFF),
-    textColor: Color = Color.Black
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        horizontalArrangement = if (isLeft) Arrangement.Start else Arrangement.End
-    ) {
-        Surface(
-            color = color,
-            shape = RoundedCornerShape(20.dp),
-            shadowElevation = 2.dp
-        ) {
-            Text(
-                text = text,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-                fontSize = 14.sp,
-                color = textColor
-            )
-        }
-    }
-}
 @Preview(showBackground = true)
 @Composable
 fun MainScreenPreview(){
