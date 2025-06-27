@@ -144,12 +144,12 @@ class OverlayService : Service() {
                         Log.d("overlayService", "ComposeView setContent 내부 실행")
                         EarlyBirdComposeTheme {
                             TimerOverlayContent(
-                                onTimerFinish = {
-//                                    val intent = Intent(this@OverlayService, MainActivity::class.java).apply {
-//                                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-//                                    }
-//                                    startActivity(intent)
-//                                    stopSelf()
+                                onTimerDoneClick = {
+                                    val intent = Intent(this@OverlayService, MainActivity::class.java).apply {
+                                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                                    }
+                                    startActivity(intent)
+                                    stopSelf()
                                 }
                             )
                         }
@@ -191,13 +191,13 @@ class OverlayService : Service() {
 }
 
 @Composable
-fun TimerOverlayContent(onTimerFinish: () -> Unit) {
+fun TimerOverlayContent(onTimerDoneClick: () -> Unit) {
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
         // TimerScreen을 배경으로 표시
         TimerScreen(
-            onTimerFinish = onTimerFinish
+            onTimerDoneClick = onTimerDoneClick
         )
     }
 }

@@ -11,7 +11,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
@@ -23,6 +25,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,6 +47,7 @@ import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdComposeTheme
 import kotlinx.coroutines.delay
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.StrokeCap
@@ -50,6 +55,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
@@ -57,7 +63,7 @@ import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdTheme
 
 @Composable
 fun TimerScreen(
-    onTimerFinish: () -> Unit = {}
+    onTimerDoneClick: () -> Unit = {}
 ){
     val progress = remember { Animatable(0f) }
     val durationMillis = 2*10*1000
@@ -67,8 +73,6 @@ fun TimerScreen(
             targetValue = 1f,
             animationSpec = tween(durationMillis = durationMillis, easing = LinearEasing)
         )
-        //타이머 종료
-        onTimerFinish()
     }
     val backgroundColor = when {
         progress.value < 0.5f -> Brush.verticalGradient(
@@ -93,83 +97,151 @@ fun TimerScreen(
                 .padding(top = 8.dp, start = 26.dp, end = 26.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            CircleTimer(progress.value, durationMillis)
+            CircleTimer(progress.value, durationMillis, onTimerDoneClick = onTimerDoneClick)
         }
     }
 }
+
 @Composable
 fun CircleTimer(
     progress: Float,
-    durationMillis: Int // 2분
+    durationMillis: Int, // 2분
+    onTimerDoneClick: () -> Unit
 ) {
-    val isBeforeHalf = progress < 0.5f
-    val activeColor = if (isBeforeHalf) Color(0xFF4DA6FF) else Color(0xFFFF6666) // 파랑 → 빨강
+    val color = if (progress < 0.5f) Color(0xFF4DA6FF) else Color(0xFFFF6666)
+    val isFinished = progress >= 1f
+
+    CircleTimerContainer {
+        if (!isFinished) {
+            TimerContent(progress, durationMillis, color)
+        } else {
+            TimerDoneContent(onClick = onTimerDoneClick)
+        }
+    }
+}
+
+//타이머 또는 종료 되었을 때 종료 버튼을 감싸는 컨테이너
+@Composable
+fun CircleTimerContainer(
+    content: @Composable BoxScope.() -> Unit
+) {
     Surface(
         shape = RoundedCornerShape(100.dp),
         shadowElevation = 2.dp
     ) {
         Box(
             modifier = Modifier
-                .aspectRatio(1f) // 정사각형 유지
+                .aspectRatio(1f)
                 .fillMaxWidth()
-                .background(color = Color(0xFFFFFFFF))
-                .padding(20.dp), // 너비 비율 조정
+                .background(Color.White)
+                .padding(20.dp),
             contentAlignment = Alignment.Center,
+            content = content
+        )
+    }
+}
+// 실제 타이머 기능을 하는 compose
+@Composable
+fun TimerContent(progress: Float, durationMillis: Int, color: Color) {
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val backgroundStrokeWidth = 9.dp.toPx()
+        val progressStrokeWidth = 18.dp.toPx()
+        val radius = size.minDimension / 2 - progressStrokeWidth / 2
+        val center = Offset(size.width / 2, size.height / 2)
+
+        drawCircle(
+            color = color,
+            center = center,
+            radius = radius,
+            style = Stroke(backgroundStrokeWidth)
+        )
+        drawArc(
+            color = color,
+            startAngle = -90f,
+            sweepAngle = 360f * progress,
+            useCenter = false,
+            style = Stroke(width = progressStrokeWidth, cap = StrokeCap.Round),
+            size = Size(radius * 2, radius * 2),
+            topLeft = Offset(center.x - radius, center.y - radius)
+        )
+    }
+
+    val remainingSeconds = (1f - progress) * durationMillis / 1000f
+    val totalSeconds = remainingSeconds.toInt()
+    val decimal = ((remainingSeconds - totalSeconds) * 100).toInt()
+    val minutes = totalSeconds / 60
+    val seconds = totalSeconds % 60
+
+    val timeText = buildAnnotatedString {
+        append(String.format("%02d:%02d:", minutes, seconds))
+        withStyle(style = SpanStyle(fontSize = 30.sp)) {
+            append(String.format("%02d", decimal))
+        }
+    }
+
+    Text(
+        text = timeText,
+        fontSize = 40.sp,
+        fontWeight = FontWeight.Bold,
+        color = color
+    )
+}
+//타이머가 종료되었을 때 나오는 종료 버튼
+@Composable
+fun TimerDoneContent(onClick: () -> Unit) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 66.dp)
+    ){
+        Text(
+            text = "COMPLETE!",
+            color = EarlyBirdTheme.colors.mainBlue,
+            fontSize = 36.sp,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(15.dp))
+
+        Text(
+            text = "우와! 우리가 해냈다\n다음에도 같이 하자!!",
+            color = EarlyBirdTheme.colors.fontBlack,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(40.dp))
+        Button(
+            onClick = onClick,
+            modifier = Modifier
+                .width(218.dp)
+                .height(48.dp)
+                .shadow(
+                    elevation = 8.dp,
+                    shape = RoundedCornerShape(28.dp),
+                    spotColor = Color.Black.copy(alpha = 0.25f)
+                ),
+            shape = RoundedCornerShape(28.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = EarlyBirdTheme.colors.mainBlue,
+                contentColor = EarlyBirdTheme.colors.white
+            )
         ) {
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                val backgroundStrokeWidth = 9.dp.toPx()   // 얇은 배경 원
-                val progressStrokeWidth = 18.dp.toPx()    // 두꺼운 진행 원
-                val radius = size.minDimension / 2 - progressStrokeWidth / 2
-                val center = Offset(size.width / 2, size.height / 2)
-
-                // 배경 원 (회색)
-                drawCircle(
-                    color = activeColor,
-                    center = center,
-                    radius = radius,
-                    style = Stroke(backgroundStrokeWidth)
-                )
-                // 진행 원 (파란색)
-                drawArc(
-                    color = activeColor,
-                    startAngle = -90f, // 위에서 시작
-                    sweepAngle = 360f * progress,
-                    useCenter = false,
-                    style = Stroke(
-                        width = progressStrokeWidth,
-                        cap = StrokeCap.Round
-                    ),
-                    size = Size(radius * 2, radius * 2),
-                    topLeft = Offset(
-                        center.x - radius,
-                        center.y - radius
-                    )
-                )
-            }
-            // 남은 시간 텍스트 (옵션)
-            val remainingSeconds = (1f - progress) * durationMillis / 1000f
-            val totalSeconds = remainingSeconds.toInt()
-            val decimal = ((remainingSeconds - totalSeconds) * 100).toInt() // 소수점 둘째 자리
-
-            val minutes = totalSeconds / 60
-            val seconds = totalSeconds % 60
-
-            val timeText = buildAnnotatedString {
-                append(String.format("%02d:%02d:", minutes, seconds))
-                withStyle(style = SpanStyle(fontSize = 30.sp)) {
-                    append(String.format("%02d", decimal))
-                }
-            }
             Text(
-                text = timeText,
-                fontSize = 40.sp,
-                fontWeight = FontWeight.Bold,
-                color = activeColor
+                text = "완료",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Center
             )
         }
     }
 
+//    androidx.compose.material3.Button(onClick = onClick) {
+//        Text(text = "확인", fontSize = 20.sp)
+//    }
 }
+
+//하단 이미지 (올라오는 애니메이션 추가된 이미지)
 @Composable
 fun SlideInImage(progress: Float) {
     val offsetY = remember { Animatable(250.dp, Dp.VectorConverter) }
@@ -240,7 +312,11 @@ fun SlideInImage(progress: Float) {
 fun TimerScreenPreview(){
     EarlyBirdComposeTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            TimerScreen()
+            CircleTimerContainer {
+                TimerDoneContent(
+                    onClick = { }
+                )
+            }
         }
     }
 }
