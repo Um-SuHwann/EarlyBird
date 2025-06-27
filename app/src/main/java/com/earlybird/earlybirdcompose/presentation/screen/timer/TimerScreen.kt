@@ -1,7 +1,9 @@
 package com.earlybird.earlybirdcompose.presentation.screen.timer
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -49,6 +51,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdTheme
 
@@ -57,34 +60,38 @@ fun TimerScreen(){
     val backgroundColor = Brush.verticalGradient(
         colors = listOf(Color(0xFFF7F7F7), Color(0xFFD9F8FF))
     )
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(brush = backgroundColor)
-    ){
-        SlideInImage()
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp, start = 26.dp, end = 26.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            CircleTimer()
-        }
-    }
-}
-@Composable
-fun CircleTimer(
-    durationMillis: Int = 2 * 60 * 1000 // 2분
-) {
     val progress = remember { Animatable(0f) }
-
+    val durationMillis = 2*10*1000
+    // 타이머 시작
     LaunchedEffect(Unit) {
         progress.animateTo(
             targetValue = 1f,
             animationSpec = tween(durationMillis = durationMillis, easing = LinearEasing)
         )
     }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(brush = backgroundColor)
+    ){
+        SlideInImage(progress = progress.value)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp, start = 26.dp, end = 26.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            CircleTimer(progress.value, durationMillis)
+        }
+    }
+}
+@Composable
+fun CircleTimer(
+    progress: Float,
+    durationMillis: Int // 2분
+) {
+    val isBeforeHalf = progress < 0.5f
+    val activeColor = if (isBeforeHalf) Color(0xFF4DA6FF) else Color(0xFFFF6666) // 파랑 → 빨강
     Surface(
         shape = RoundedCornerShape(100.dp),
         shadowElevation = 2.dp
@@ -105,16 +112,16 @@ fun CircleTimer(
 
                 // 배경 원 (회색)
                 drawCircle(
-                    color = Color(0xFF4DA6FF),
+                    color = activeColor,
                     center = center,
                     radius = radius,
                     style = Stroke(backgroundStrokeWidth)
                 )
                 // 진행 원 (파란색)
                 drawArc(
-                    color = Color(0xFF4DA6FF),
+                    color = activeColor,
                     startAngle = -90f, // 위에서 시작
-                    sweepAngle = 360f * progress.value,
+                    sweepAngle = 360f * progress,
                     useCenter = false,
                     style = Stroke(
                         width = progressStrokeWidth,
@@ -128,7 +135,7 @@ fun CircleTimer(
                 )
             }
             // 남은 시간 텍스트 (옵션)
-            val remainingSeconds = (1f - progress.value) * durationMillis / 1000f
+            val remainingSeconds = (1f - progress) * durationMillis / 1000f
             val totalSeconds = remainingSeconds.toInt()
             val decimal = ((remainingSeconds - totalSeconds) * 100).toInt() // 소수점 둘째 자리
 
@@ -145,46 +152,60 @@ fun CircleTimer(
                 text = timeText,
                 fontSize = 40.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF4DA6FF)
+                color = activeColor
             )
         }
     }
 
 }
 @Composable
-fun SlideInImage() {
-    var visible by remember { mutableStateOf(false) }
+fun SlideInImage(progress: Float) {
+    val offsetY = remember { Animatable(250.dp, Dp.VectorConverter) }
+    var hasAnimatedHalfway by remember { mutableStateOf(false) }
 
-    // y축 위치를 상태로 가지고 있다가 애니메이션으로 움직임
-    val offsetY by animateDpAsState(
-        targetValue = if (visible) 40.dp else 250.dp, // 처음에는 100dp 아래
-        animationSpec = tween(durationMillis = 1000),
-        label = "imageSlide"
-    )
+    val readyPainter = painterResource(R.drawable.timer_bird_ready)
+    val startPainter = painterResource(R.drawable.timer_bird_start)
 
-    // 타이머로 애니메이션 트리거
+    val isHalfway = remember(progress) { progress >= 0.5f }
+    // 초기 진입 애니메이션 (위로 슬라이드)
     LaunchedEffect(Unit) {
-        delay(500) // 0.5초 뒤 시작
-        visible = true
+        delay(500)
+        offsetY.animateTo(0.dp, animationSpec = tween(durationMillis = 1000))
     }
 
+    // 절반 시점에 아래로 갔다가 다시 위로 올라오기
+    LaunchedEffect(isHalfway) {
+        if (progress >= 0.5f && !hasAnimatedHalfway) {
+            offsetY.animateTo(700.dp, animationSpec = tween(1000)) // 아래로
+            hasAnimatedHalfway = true
+            delay(200)
+            offsetY.animateTo(0.dp, animationSpec = tween(1000))   // 다시 위로
+        }
+    }
+    val currentPainter = if (hasAnimatedHalfway) startPainter else readyPainter
     Box(
         modifier = Modifier
             .fillMaxSize(),
-        contentAlignment = Alignment.TopCenter
+        contentAlignment = Alignment.BottomCenter
     ) {
-        Image(
-            painter = painterResource(R.drawable.timer_bird_ready),
-            contentDescription = "timer 캐릭터",
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .offset(y = offsetY)
-                .width(603.dp)
-                .height(573.dp),
-            contentScale = ContentScale.Fit
-        )
+        Crossfade(
+            targetState = currentPainter,
+            animationSpec = tween(durationMillis = 200),
+            label = "imageCrossfade")
+            { painter ->
+            Image(
+                painter = painter,
+                contentDescription = "timer 캐릭터",
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .offset(y = offsetY.value)
+                    .fillMaxWidth(1f),
+                contentScale = ContentScale.Fit
+            )
+        }
     }
 }
+
 @Preview(showBackground = true)
 @Composable
 fun TimerScreenPreview(){
