@@ -56,10 +56,9 @@ import androidx.compose.ui.unit.sp
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdTheme
 
 @Composable
-fun TimerScreen(){
-    val backgroundColor = Brush.verticalGradient(
-        colors = listOf(Color(0xFFF7F7F7), Color(0xFFD9F8FF))
-    )
+fun TimerScreen(
+    onTimerFinish: () -> Unit = {}
+){
     val progress = remember { Animatable(0f) }
     val durationMillis = 2*10*1000
     // 타이머 시작
@@ -67,6 +66,19 @@ fun TimerScreen(){
         progress.animateTo(
             targetValue = 1f,
             animationSpec = tween(durationMillis = durationMillis, easing = LinearEasing)
+        )
+        //타이머 종료
+        onTimerFinish()
+    }
+    val backgroundColor = when {
+        progress.value < 0.5f -> Brush.verticalGradient(
+            colors = listOf(Color(0xFFF7F7F7), Color(0xFFD9F8FF))
+        )
+        progress.value < 1f -> Brush.verticalGradient(
+            colors = listOf(Color(0xFFFFF3E0), Color(0xFFFFF776)) // 절반 이후 색
+        )
+        else -> Brush.verticalGradient(
+            colors = listOf(Color(0xFFFFFBEC), Color(0xFFFFFBEC)) // 종료 색
         )
     }
     Box(
@@ -162,11 +174,15 @@ fun CircleTimer(
 fun SlideInImage(progress: Float) {
     val offsetY = remember { Animatable(250.dp, Dp.VectorConverter) }
     var hasAnimatedHalfway by remember { mutableStateOf(false) }
+    var hasAnimatedFinished by remember { mutableStateOf(false) }
 
     val readyPainter = painterResource(R.drawable.timer_bird_ready)
     val startPainter = painterResource(R.drawable.timer_bird_start)
+    val endPainter = painterResource(R.drawable.timer_bird_end)
 
-    val isHalfway = remember(progress) { progress >= 0.5f }
+    val isHalfway = progress >= 0.5f
+    val isFinished = progress >= 1f
+
     // 초기 진입 애니메이션 (위로 슬라이드)
     LaunchedEffect(Unit) {
         delay(500)
@@ -175,21 +191,34 @@ fun SlideInImage(progress: Float) {
 
     // 절반 시점에 아래로 갔다가 다시 위로 올라오기
     LaunchedEffect(isHalfway) {
-        if (progress >= 0.5f && !hasAnimatedHalfway) {
+        if (isHalfway && !hasAnimatedHalfway) {
             offsetY.animateTo(700.dp, animationSpec = tween(1000)) // 아래로
             hasAnimatedHalfway = true
             delay(200)
             offsetY.animateTo(0.dp, animationSpec = tween(1000))   // 다시 위로
         }
     }
-    val currentPainter = if (hasAnimatedHalfway) startPainter else readyPainter
+    // 완료 시점에 아래로 갔다가 다시 위로 올라오기
+    LaunchedEffect(isFinished) {
+        if (isFinished && !hasAnimatedFinished) {
+            offsetY.animateTo(700.dp, animationSpec = tween(1000)) // 아래로
+            hasAnimatedFinished = true
+            delay(200)
+            offsetY.animateTo(0.dp, animationSpec = tween(1000))   // 다시 위로
+        }
+    }
+    val painter = when {
+        hasAnimatedFinished -> endPainter
+        hasAnimatedHalfway -> startPainter
+        else -> readyPainter
+    }
     Box(
         modifier = Modifier
             .fillMaxSize(),
         contentAlignment = Alignment.BottomCenter
     ) {
         Crossfade(
-            targetState = currentPainter,
+            targetState = painter,
             animationSpec = tween(durationMillis = 200),
             label = "imageCrossfade")
             { painter ->

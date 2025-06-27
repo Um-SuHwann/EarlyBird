@@ -144,13 +144,12 @@ class OverlayService : Service() {
                         Log.d("overlayService", "ComposeView setContent 내부 실행")
                         EarlyBirdComposeTheme {
                             TimerOverlayContent(
-                                onEndClick = {
-                                    Log.d("overlayService", "종료 버튼 클릭됨")
-                                    val intent = Intent(this@OverlayService, MainActivity::class.java).apply {
-                                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                                    }
-                                    startActivity(intent)
-                                    stopSelf()
+                                onTimerFinish = {
+//                                    val intent = Intent(this@OverlayService, MainActivity::class.java).apply {
+//                                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+//                                    }
+//                                    startActivity(intent)
+//                                    stopSelf()
                                 }
                             )
                         }
@@ -192,32 +191,13 @@ class OverlayService : Service() {
 }
 
 @Composable
-fun TimerOverlayContent(onEndClick: () -> Unit) {
+fun TimerOverlayContent(onTimerFinish: () -> Unit) {
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
         // TimerScreen을 배경으로 표시
-        TimerScreen()
-        
-        // 종료 버튼을 오버레이 위에 표시
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(16.dp)
-        ) {
-            Button(
-                onClick = onEndClick,
-                modifier = Modifier.background(
-                    color = Color.Black.copy(alpha = 0.7f),
-                    shape = CircleShape
-                )
-            ) {
-                Text(
-                    text = "종료",
-                    color = Color.White,
-                    fontSize = 14.sp
-                )
-            }
-        }
+        TimerScreen(
+            onTimerFinish = onTimerFinish
+        )
     }
 }
