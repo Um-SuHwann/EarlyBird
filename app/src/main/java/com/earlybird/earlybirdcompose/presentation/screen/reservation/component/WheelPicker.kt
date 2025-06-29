@@ -37,6 +37,9 @@ fun WheelPicker(
     onHourSelected: (String) -> Unit,
     onMinuteSelected: (String) -> Unit,
     onPaSelected: (String) -> Unit,
+    initialHourIndex: Int = 0,
+    initialMinuteIndex: Int = 0,
+    initialPaIndex: Int = 0,
 ) {
     val itemHeight = 48.dp
     val visibleItemCount = 3
@@ -45,9 +48,9 @@ fun WheelPicker(
     val repeatedHours = List(100) { hourItems }.flatten()
     val repeatedMinutes = List(100) { minuteItems }.flatten()
 
-    val hourListState = rememberLazyListState(initialFirstVisibleItemIndex = repeatedHours.size / 2)
-    val minuteListState = rememberLazyListState(initialFirstVisibleItemIndex = repeatedMinutes.size / 2)
-    val paListState = rememberLazyListState(initialFirstVisibleItemIndex = 0)
+    val hourListState = rememberLazyListState(initialFirstVisibleItemIndex = repeatedHours.size / 2 + initialHourIndex - 1)
+    val minuteListState = rememberLazyListState(initialFirstVisibleItemIndex = repeatedMinutes.size / 2 + initialMinuteIndex - 1)
+    val paListState = rememberLazyListState(initialFirstVisibleItemIndex = initialPaIndex)
 
     val selectedHourIndex by remember { derivedStateOf { hourListState.firstVisibleItemIndex + 1 } }
     val selectedMinuteIndex by remember { derivedStateOf { minuteListState.firstVisibleItemIndex + 1 } }

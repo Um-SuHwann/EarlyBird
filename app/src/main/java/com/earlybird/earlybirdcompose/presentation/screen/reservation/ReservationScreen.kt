@@ -1,29 +1,15 @@
 package com.earlybird.earlybirdcompose.presentation.screen.reservation
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.TimePickerState
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,21 +32,21 @@ import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdComposeTheme
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdTheme
 import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReservationScreen() {
     var todoText by remember { mutableStateOf("") }
-    var isRepeating by remember { mutableStateOf(false) }
-    var isVibrationEnabled by remember { mutableStateOf(true) }
-    
     val currentTime = LocalTime.now()
-    val timePickerState = rememberTimePickerState(
-        initialHour = currentTime.hour,
-        initialMinute = currentTime.minute
-    )
-    
+    //시간 범위
+    val hourItems = (1..12).map { "%02d".format(it) }
+    val minuteItems = (0..59).map { "%02d".format(it) }
+    val paItems = listOf("AM", "PM")
+
+    val hour12 = if (currentTime.hour % 12 == 0) 12 else currentTime.hour % 12
+    //초기 시간 설정
+    val initialHourIndex = hourItems.indexOf("%02d".format(hour12))
+    val initialMinuteIndex = minuteItems.indexOf("%02d".format(currentTime.minute))
+    val initialPaIndex = if (currentTime.hour >= 12) 1 else 0
     Column(
         modifier = Modifier
             .fillMaxSize(),
@@ -85,10 +70,6 @@ fun ReservationScreen() {
         )
         Spacer(modifier = Modifier.height(40.dp))
         // 시간 선택
-        val hourItems = (0..23).map { "%02d".format(it) }
-        val minuteItems = (0..59).map { "%02d".format(it) }
-        val paItems = listOf("AM", "PM")
-
         WheelPicker(
             modifier = Modifier.align(Alignment.CenterHorizontally),
             hourItems = hourItems,
@@ -96,7 +77,10 @@ fun ReservationScreen() {
             paItems = paItems,
             onHourSelected = { },
             onMinuteSelected = { },
-            onPaSelected = { }
+            onPaSelected = { },
+            initialHourIndex = initialHourIndex,
+            initialMinuteIndex = initialMinuteIndex,
+            initialPaIndex = initialPaIndex
         )
         Spacer(modifier = Modifier.height(48.dp))
         // 반복 설정
