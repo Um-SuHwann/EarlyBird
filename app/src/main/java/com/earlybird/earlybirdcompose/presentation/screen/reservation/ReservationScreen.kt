@@ -37,6 +37,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.earlybird.earlybirdcompose.R
 import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.BackTopBar
+import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.RepeatOptionSelector
 import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.TodoSpeechBubble
 import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.WheelPicker
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdComposeTheme
@@ -92,42 +93,9 @@ fun ReservationScreen() {
             onMinuteSelected = { },
             onPaSelected = { }
         )
-        
+        Spacer(modifier = Modifier.height(48.dp))
         // 반복 설정
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Text(
-                    text = "반복 설정",
-                    style = androidx.compose.material3.MaterialTheme.typography.titleMedium
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    RadioButton(
-                        selected = !isRepeating,
-                        onClick = { isRepeating = false }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("한 번만")
-                }
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    RadioButton(
-                        selected = isRepeating,
-                        onClick = { isRepeating = true }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("매일 반복")
-                }
-            }
-        }
+        RepeatOptionSelector()
         
         // 진동 설정
         Card(

@@ -56,7 +56,7 @@ fun WheelPicker(
         modifier = modifier
             .height(listHeight)
             .background(
-                color = Color.Transparent, // shape_reservation_scroll_layout 대신 적당한 색상 또는 Modifier.clip(Shape)
+                color = Color.Transparent,
             )
             .width(220.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -163,7 +163,7 @@ fun WheelPicker(
 fun WheelPickerPreview() {
     val hourItems = (0..23).map { "%02d".format(it) }
     val minuteItems = (0..59).map { "%02d".format(it) }
-    val paItems = listOf("오전", "오후")
+    val paItems = listOf("AM", "PM")
 
     WheelPicker(
         hourItems = hourItems,
