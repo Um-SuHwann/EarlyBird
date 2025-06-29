@@ -12,6 +12,13 @@ fun NavGraphBuilder.reservationGraph(
     startIntent: Intent,
 ) {
     composable("reservation") {
-        ReservationScreen()
+        ReservationScreen(
+            onBackClick = {
+                navController.navigate("main"){
+                    popUpTo("reservation") { inclusive = true }
+                    launchSingleTop = true //main 화면이 스택에 이미 있다면 새로 넣지 않음
+                }
+            }
+        )
     }
 }

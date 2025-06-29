@@ -34,7 +34,11 @@ import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdTheme
 import java.time.LocalTime
 
 @Composable
-fun ReservationScreen() {
+fun ReservationScreen(
+    onBackClick: () -> Unit = {},
+    onStartNowClick: () -> Unit = {},
+    onSettingClick: () -> Unit = {}
+) {
     var todoText by remember { mutableStateOf("") }
     val currentTime = LocalTime.now()
     //시간 범위
@@ -51,7 +55,7 @@ fun ReservationScreen() {
         modifier = Modifier
             .fillMaxSize(),
     ) {
-        BackTopBar()
+        BackTopBar(onBackClick = onBackClick)
         Spacer(modifier = Modifier.height(25.dp))
         //캐릭터 이미지
         Image(
