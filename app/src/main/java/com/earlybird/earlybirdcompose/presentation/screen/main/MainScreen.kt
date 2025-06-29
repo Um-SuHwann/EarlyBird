@@ -145,7 +145,7 @@ fun MainScreen(
                         backgroundColor = Color(0xFF0FA7CE),
                         textColor = EarlyBirdTheme.colors.white,
                         iconColor = EarlyBirdTheme.colors.mainBlue,
-                        onClick = { /* 원하는 시간에 시작하기 클릭 시 동작 */ }
+                        onClick = onSelectTimeClick
                     )
                     MainActionButton(
                         text = "지금 당장 시작하기 >",

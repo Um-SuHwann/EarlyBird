@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.earlybird.earlybirdcompose.presentation.screen.main.navigation.mainGraph
+import com.earlybird.earlybirdcompose.presentation.screen.reservation.navigation.reservationGraph
 import com.earlybird.earlybirdcompose.presentation.screen.splash.navigation.splashGraph
 import com.earlybird.earlybirdcompose.presentation.screen.timer.navigation.timerGraph
 
@@ -35,6 +36,10 @@ fun AppNavigation(startIntent: Intent){
             startIntent = startIntent,
         )
         timerGraph(
+            navController = navController,
+            startIntent = startIntent,
+        )
+        reservationGraph(
             navController = navController,
             startIntent = startIntent,
         )

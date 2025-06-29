@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import com.earlybird.earlybirdcompose.R
 import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.BackTopBar
 import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.TodoSpeechBubble
+import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.WheelPicker
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdComposeTheme
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -76,26 +77,21 @@ fun ReservationScreen() {
             text = todoText,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
-        
+        Spacer(modifier = Modifier.height(40.dp))
         // 시간 선택
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Text(
-                    text = "시간 선택",
-                    style = androidx.compose.material3.MaterialTheme.typography.titleMedium
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                TimePicker(
-                    state = timePickerState,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        }
+        val hourItems = (0..23).map { "%02d".format(it) }
+        val minuteItems = (0..59).map { "%02d".format(it) }
+        val paItems = listOf("AM", "PM")
+
+        WheelPicker(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            hourItems = hourItems,
+            minuteItems = minuteItems,
+            paItems = paItems,
+            onHourSelected = { },
+            onMinuteSelected = { },
+            onPaSelected = { }
+        )
         
         // 반복 설정
         Card(
