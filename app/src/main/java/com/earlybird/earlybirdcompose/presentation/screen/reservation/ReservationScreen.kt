@@ -24,6 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.earlybird.earlybirdcompose.R
+import com.earlybird.earlybirdcompose.data.model.AlarmInfo
 import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.BackTopBar
 import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.ConcentrationTimeSelector
 import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.RepeatOptionSelector
@@ -37,13 +38,22 @@ import java.time.LocalTime
 @Composable
 fun ReservationScreen(
     onBackClick: () -> Unit = {},
+    onSaveAlarm: (AlarmInfo) -> Unit = {}
 ) {
+    //알람 등록할 때 쓰는 정보들
+    var todoText by remember { mutableStateOf("") }
+    var selectedHour by remember { mutableStateOf("08") }
+    var selectedMinute by remember { mutableStateOf("00") }
+    var selectedPa by remember { mutableStateOf("AM") }
+    var isRepeating by remember { mutableStateOf(true) }
+    var isVibrationEnabled by remember { mutableStateOf(true) }
+    var focusDuration by remember { mutableStateOf(2) }
+
     //컴포넌트 재사용을 위한 스텝
     var currentStep by remember { mutableStateOf(1) }
 
-    var todoText by remember { mutableStateOf("") }
-    val currentTime = LocalTime.now()
     //시간 범위
+    val currentTime = LocalTime.now()
     val hourItems = (1..12).map { "%02d".format(it) }
     val minuteItems = (0..59).map { "%02d".format(it) }
     val paItems = listOf("AM", "PM")
@@ -73,7 +83,8 @@ fun ReservationScreen(
             // 할일 입력 필드
             TodoSpeechBubble(
                 text = todoText,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                onTextChange = { todoText = it }
             )
             Spacer(modifier = Modifier.height(40.dp))
             // 시간 선택
@@ -106,7 +117,16 @@ fun ReservationScreen(
                 if(currentStep == 1){
                     currentStep = 2
                 }else{
-
+                    val alarmInfo = AlarmInfo(
+                        todo = todoText,
+                        hour = selectedHour.toInt(),
+                        minute = selectedMinute.toInt(),
+                        amPm = selectedPa,
+                        isRepeating = isRepeating,
+                        isVibrationEnabled = isVibrationEnabled,
+                        focusDurationMinutes = focusDuration
+                    )
+                    onSaveAlarm(alarmInfo)
                 }
             },
             modifier = Modifier

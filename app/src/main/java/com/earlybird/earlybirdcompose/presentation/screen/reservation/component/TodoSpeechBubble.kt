@@ -4,30 +4,39 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.earlybird.earlybirdcompose.R
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdTheme
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TodoSpeechBubble(
     text: String,
+    onTextChange: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Box(
         modifier = modifier.then(
-            Modifier.padding(top = 10.dp)
+            Modifier
+                .fillMaxWidth()
+                .padding(top = 10.dp, start = 16.dp, end = 16.dp)
         ),
         contentAlignment = Alignment.TopCenter
     ) {
@@ -49,10 +58,39 @@ fun TodoSpeechBubble(
                     color = EarlyBirdTheme.colors.white,
                     shape = RoundedCornerShape(100)
                 )
-                .width(282.dp)
-                .height(40.dp)
+                .fillMaxWidth()
+                .height(56.dp),
         ) {
-            Text(text = text)
+            androidx.compose.material3.TextField(
+                value = text,
+                onValueChange = {
+                    if (it.length <= 25) onTextChange(it)
+                },
+                singleLine = true,
+                placeholder = {
+                    Text(
+                        text = "여기를 눌러 같이 할 일을 입력해줘!",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 0.dp)
+                    .align(Alignment.Center),
+                colors = androidx.compose.material3.TextFieldDefaults.textFieldColors(
+                    containerColor = EarlyBirdTheme.colors.white,
+                    unfocusedIndicatorColor = EarlyBirdTheme.colors.white, // 밑줄 없애기
+                    focusedIndicatorColor = EarlyBirdTheme.colors.white,   // 밑줄 없애기
+                    disabledIndicatorColor = EarlyBirdTheme.colors.white
+                ),
+                textStyle = androidx.compose.ui.text.TextStyle(
+                    fontSize = 14.sp,  // 입력 글씨 크기 설정
+                    fontWeight = FontWeight.Bold,
+                    color = EarlyBirdTheme.colors.fontBlack,
+                    textAlign = TextAlign.Center
+                ),
+            )
         }
     }
 }
