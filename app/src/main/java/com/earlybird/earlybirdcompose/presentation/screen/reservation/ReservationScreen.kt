@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.earlybird.earlybirdcompose.R
 import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.BackTopBar
+import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.ConcentrationTimeSelector
 import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.RepeatOptionSelector
 import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.TodoSpeechBubble
 import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.VibrationSelector
@@ -36,9 +37,10 @@ import java.time.LocalTime
 @Composable
 fun ReservationScreen(
     onBackClick: () -> Unit = {},
-    onStartNowClick: () -> Unit = {},
-    onSettingClick: () -> Unit = {}
 ) {
+    //컴포넌트 재사용을 위한 스텝
+    var currentStep by remember { mutableStateOf(1) }
+
     var todoText by remember { mutableStateOf("") }
     val currentTime = LocalTime.now()
     //시간 범위
@@ -67,37 +69,45 @@ fun ReservationScreen(
                 .align(Alignment.CenterHorizontally)
         )
         Spacer(modifier = Modifier.height(8.dp))
-        // 할일 입력 필드
-        TodoSpeechBubble(
-            text = todoText,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
-        Spacer(modifier = Modifier.height(40.dp))
-        // 시간 선택
-        WheelPicker(
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            hourItems = hourItems,
-            minuteItems = minuteItems,
-            paItems = paItems,
-            onHourSelected = { },
-            onMinuteSelected = { },
-            onPaSelected = { },
-            initialHourIndex = initialHourIndex,
-            initialMinuteIndex = initialMinuteIndex,
-            initialPaIndex = initialPaIndex
-        )
-        Spacer(modifier = Modifier.height(48.dp))
-        // 반복 설정
-        RepeatOptionSelector()
-        Spacer(modifier = Modifier.height(20.dp))
-        // 진동 설정
-        VibrationSelector()
+        if(currentStep == 1){
+            // 할일 입력 필드
+            TodoSpeechBubble(
+                text = todoText,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+            Spacer(modifier = Modifier.height(40.dp))
+            // 시간 선택
+            WheelPicker(
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                hourItems = hourItems,
+                minuteItems = minuteItems,
+                paItems = paItems,
+                onHourSelected = { },
+                onMinuteSelected = { },
+                onPaSelected = { },
+                initialHourIndex = initialHourIndex,
+                initialMinuteIndex = initialMinuteIndex,
+                initialPaIndex = initialPaIndex
+            )
+            Spacer(modifier = Modifier.height(48.dp))
+            // 반복 설정
+            RepeatOptionSelector()
+            Spacer(modifier = Modifier.height(20.dp))
+            // 진동 설정
+            VibrationSelector()
+        }
+        else{
+            ConcentrationTimeSelector()
+        }
         Spacer(modifier = Modifier.height(30.dp))
-        
         // 저장 버튼
         Button(
             onClick = {
-                // TODO: 저장 로직 구현
+                if(currentStep == 1){
+                    currentStep = 2
+                }else{
+
+                }
             },
             modifier = Modifier
                 .width(180.dp)
@@ -110,7 +120,7 @@ fun ReservationScreen(
 
         ) {
             Text(
-                text = "다음",
+                text = if(currentStep == 1) "다음" else "시작하기",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.align(Alignment.CenterVertically)
