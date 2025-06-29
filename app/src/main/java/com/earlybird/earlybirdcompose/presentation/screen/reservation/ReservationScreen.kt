@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,15 +33,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.earlybird.earlybirdcompose.R
 import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.BackTopBar
 import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.RepeatOptionSelector
 import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.TodoSpeechBubble
+import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.VibrationSelector
 import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.WheelPicker
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdComposeTheme
+import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdTheme
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
@@ -96,31 +101,10 @@ fun ReservationScreen() {
         Spacer(modifier = Modifier.height(48.dp))
         // 반복 설정
         RepeatOptionSelector()
-        
+        Spacer(modifier = Modifier.height(20.dp))
         // 진동 설정
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "진동",
-                    style = androidx.compose.material3.MaterialTheme.typography.titleMedium
-                )
-                Switch(
-                    checked = isVibrationEnabled,
-                    onCheckedChange = { isVibrationEnabled = it }
-                )
-            }
-        }
-        
-        Spacer(modifier = Modifier.weight(1f))
+        VibrationSelector()
+        Spacer(modifier = Modifier.height(30.dp))
         
         // 저장 버튼
         Button(
@@ -128,12 +112,20 @@ fun ReservationScreen() {
                 // TODO: 저장 로직 구현
             },
             modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
+                .width(180.dp)
+                .height(48.dp)
+                .align(Alignment.CenterHorizontally),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = EarlyBirdTheme.colors.mainBlue,
+                contentColor = EarlyBirdTheme.colors.white
+            )
+
         ) {
             Text(
-                text = "저장",
-                style = androidx.compose.material3.MaterialTheme.typography.titleMedium
+                text = "다음",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.align(Alignment.CenterVertically)
             )
         }
     }
