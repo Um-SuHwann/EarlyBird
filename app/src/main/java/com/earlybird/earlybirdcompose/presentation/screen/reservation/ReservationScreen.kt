@@ -36,7 +36,9 @@ import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdComposeTheme
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdTheme
 import com.earlybird.earlybirdcompose.util.checkPermission
+import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.temporal.ChronoUnit
 
 @Composable
 fun ReservationScreen(
@@ -141,11 +143,17 @@ fun ReservationScreen(
                         focusDurationMinutes = focusDuration
                     )
                     onSaveAlarm(alarmInfo)
+                    val (hoursLeft, minutesLeft) = calculateRemainingTime(
+                        selectedHour,
+                        selectedMinute,
+                        selectedPa
+                    )
+                    val message = "${hoursLeft}시간 ${minutesLeft}분 후에\n같이 시작해보자!"
                     //알람 저장 확인
                     Log.d("reservation", alarmInfo.toString())
                     checkPermission(
                         context = context,
-                        content = "nn시간 nn분 후에\n같이 시작해보자!",
+                        content = message,
                         buttonContent = "좋아!",
                         durationMillis = focusDuration,
                         isFinished = true
@@ -171,7 +179,30 @@ fun ReservationScreen(
         }
     }
 }
+fun calculateRemainingTime(hour: Int, minute: Int, amPm: String): Pair<Int, Int> {
+    // 12시간 → 24시간 변환
+    val hour24 = when {
+        amPm == "AM" && hour == 12 -> 0
+        amPm == "AM" -> hour
+        amPm == "PM" && hour == 12 -> 12
+        else -> hour + 12
+    }
 
+    val now = LocalDateTime.now()
+    var targetTime = now.withHour(hour24).withMinute(minute).withSecond(0)
+
+    // 현재보다 이전 시간인 경우 → 다음날로 예약
+    if (targetTime.isBefore(now)) {
+        targetTime = targetTime.plusDays(1)
+    }
+
+    val secondsUntil = ChronoUnit.SECONDS.between(now, targetTime)
+    val roundedMinutes = (secondsUntil + 59) / 60  // 올림 처리
+    val hours = (roundedMinutes / 60).toInt()
+    val minutes = (roundedMinutes % 60).toInt()
+
+    return hours to minutes
+}
 @Preview(showBackground = true)
 @Composable
 fun ReservationScreenPreview(){
