@@ -27,8 +27,7 @@ fun TimerContainer(
             modifier = Modifier
                 .aspectRatio(1f)
                 .fillMaxWidth()
-                .background(Color.White)
-                .padding(20.dp),
+                .background(Color.White),
             contentAlignment = Alignment.Center,
             content = content
         )

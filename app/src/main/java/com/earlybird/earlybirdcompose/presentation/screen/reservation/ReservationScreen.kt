@@ -145,7 +145,7 @@ fun ReservationScreen(
                     Log.d("reservation", alarmInfo.toString())
                     checkPermission(
                         context = context,
-                        content = "우와! 우리가 해냈다\n다음에도 같이 하자!",
+                        content = "nn시간 nn분 후에\n같이 시작해보자!",
                         buttonContent = "좋아!",
                         durationMillis = focusDuration,
                         isFinished = true

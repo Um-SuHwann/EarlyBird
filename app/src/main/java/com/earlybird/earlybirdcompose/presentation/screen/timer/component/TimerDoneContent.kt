@@ -31,7 +31,7 @@ fun TimerDoneContent(
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Top,
         modifier = Modifier
             .fillMaxSize()
             .padding(top = 66.dp)
@@ -45,7 +45,7 @@ fun TimerDoneContent(
         Spacer(modifier = Modifier.height(15.dp))
 
         Text(
-            text = "우와! 우리가 해냈다\n다음에도 같이 하자!!",
+            text = content,
             color = EarlyBirdTheme.colors.fontBlack,
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold
@@ -68,7 +68,7 @@ fun TimerDoneContent(
             )
         ) {
             Text(
-                text = "완료",
+                text = buttonContent,
                 fontSize = 28.sp,
                 fontWeight = FontWeight.SemiBold,
                 textAlign = TextAlign.Center

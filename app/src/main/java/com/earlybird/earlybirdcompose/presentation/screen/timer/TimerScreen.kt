@@ -1,5 +1,6 @@
 package com.earlybird.earlybirdcompose.presentation.screen.timer
 
+import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -33,6 +34,7 @@ fun TimerScreen(
     isFinished: Boolean = false,
     onTimerDoneClick: () -> Unit = {}
 ){
+    Log.d("overlayService", "$content , $buttonContent , $durationMillis , $isFinished")
     val progress = remember { Animatable(if (isFinished) 1f else 0f) }
     // 타이머 시작
     LaunchedEffect(Unit) {
@@ -63,7 +65,7 @@ fun TimerScreen(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp, start = 26.dp, end = 26.dp),
+                .padding(top = 18.dp, start = 26.dp, end = 26.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             CircleTimer(

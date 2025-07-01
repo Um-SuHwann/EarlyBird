@@ -27,7 +27,11 @@ import kotlinx.coroutines.delay
 //하단 이미지 (올라오는 애니메이션 추가된 이미지)
 @Composable
 fun SlideInImage(progress: Float) {
-    val offsetY = remember { Animatable(250.dp, Dp.VectorConverter) }
+    val isHalfway = progress >= 0.5f
+    val isFinished = progress >= 1f
+
+    val offsetY = remember { if(isFinished) Animatable(700.dp, Dp.VectorConverter) else Animatable(250.dp, Dp.VectorConverter) }
+
     var hasAnimatedHalfway by remember { mutableStateOf(false) }
     var hasAnimatedFinished by remember { mutableStateOf(false) }
 
@@ -35,18 +39,22 @@ fun SlideInImage(progress: Float) {
     val startPainter = painterResource(R.drawable.timer_bird_start)
     val endPainter = painterResource(R.drawable.timer_bird_end)
 
-    val isHalfway = progress >= 0.5f
-    val isFinished = progress >= 1f
-
     // 초기 진입 애니메이션 (위로 슬라이드)
+    //LaunchedEffect는 컴포지션에서 위에서 아래도 배치된 순서대로 실행되어서 가능하다
     LaunchedEffect(Unit) {
-        delay(500)
-        offsetY.animateTo(0.dp, animationSpec = tween(durationMillis = 1000))
+        if (isFinished) {
+            hasAnimatedHalfway = true
+            hasAnimatedFinished = true
+            delay(300)
+            offsetY.animateTo(0.dp, animationSpec = tween(durationMillis = 1000))
+        } else {
+            delay(300)
+            offsetY.animateTo(0.dp, animationSpec = tween(durationMillis = 1000))
+        }
     }
-
     // 절반 시점에 아래로 갔다가 다시 위로 올라오기
     LaunchedEffect(isHalfway) {
-        if (isHalfway && !hasAnimatedHalfway) {
+        if (isHalfway && !hasAnimatedHalfway && !isFinished) {
             offsetY.animateTo(700.dp, animationSpec = tween(1000)) // 아래로
             hasAnimatedHalfway = true
             delay(200)
