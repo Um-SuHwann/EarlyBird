@@ -9,16 +9,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,6 +35,7 @@ import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.
 import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.WheelPicker
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdComposeTheme
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdTheme
+import com.earlybird.earlybirdcompose.util.checkPermission
 import java.time.LocalTime
 
 @Composable
@@ -48,7 +50,7 @@ fun ReservationScreen(
     var selectedPa by remember { mutableStateOf("AM") }
     var isRepeating by remember { mutableStateOf(true) }
     var isVibrationEnabled by remember { mutableStateOf(true) }
-    var focusDuration by remember { mutableStateOf(0) }
+    var focusDuration by remember { mutableIntStateOf(0) }
 
     //컴포넌트 재사용을 위한 스텝
     var currentStep by remember { mutableStateOf(1) }
@@ -64,6 +66,8 @@ fun ReservationScreen(
     val initialHourIndex = hourItems.indexOf("%02d".format(hour12))
     val initialMinuteIndex = minuteItems.indexOf("%02d".format(currentTime.minute))
     val initialPaIndex = if (currentTime.hour >= 12) 1 else 0
+
+    val context = LocalContext.current
     Column(
         modifier = Modifier
             .fillMaxSize(),
@@ -137,7 +141,15 @@ fun ReservationScreen(
                         focusDurationMinutes = focusDuration
                     )
                     onSaveAlarm(alarmInfo)
+                    //알람 저장 확인
                     Log.d("reservation", alarmInfo.toString())
+                    checkPermission(
+                        context = context,
+                        content = "우와! 우리가 해냈다\n다음에도 같이 하자!",
+                        buttonContent = "좋아!",
+                        durationMillis = focusDuration,
+                        isFinished = true
+                    )
                 }
             },
             modifier = Modifier
