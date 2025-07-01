@@ -9,21 +9,12 @@ import android.os.IBinder
 import android.util.Log
 import android.view.Gravity
 import android.view.WindowManager
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.earlybird.earlybirdcompose.MainActivity
@@ -197,6 +188,9 @@ fun TimerOverlayContent(onTimerDoneClick: () -> Unit) {
     ) {
         // TimerScreen을 배경으로 표시
         TimerScreen(
+            content = "우와 우리가 해냈다\n다음에도 같이 하자!",
+            buttonContent = "완료",
+            durationMillis = 2 * 60 * 1000,
             onTimerDoneClick = onTimerDoneClick
         )
     }
