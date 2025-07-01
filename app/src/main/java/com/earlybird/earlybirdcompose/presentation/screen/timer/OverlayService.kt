@@ -9,21 +9,8 @@ import android.os.IBinder
 import android.util.Log
 import android.view.Gravity
 import android.view.WindowManager
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.earlybird.earlybirdcompose.MainActivity
@@ -33,6 +20,7 @@ class OverlayService : Service() {
     private lateinit var windowManager: WindowManager
     private var composeView: ComposeView? = null
     private var overlayLifecycle: OverlayLifecycle? = null
+    private var hasShown = false
 
     override fun onCreate() {
         super.onCreate()
@@ -43,8 +31,6 @@ class OverlayService : Service() {
             
             windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
             Log.d("overlayService", "WindowManager 초기화 성공")
-            
-            showOverlay()
         } catch (e: ClassCastException) {
             Log.e("overlayService", "WindowManager 캐스팅 오류: ${e.message}")
             e.printStackTrace()
@@ -55,10 +41,26 @@ class OverlayService : Service() {
             stopSelf()
         }
     }
-    
+    //startService()를 호출하면 안드로이스 시스템이 서비스 객체를 만들고 onCreate()를 호출한 뒤, onStartCommand()를 호출한다.
+    //매개변수를 전달하고 싶을 때도 사용한다.
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.d("overlayService", "onStartCommand() 호출됨")
-        return super.onStartCommand(intent, flags, startId)
+
+        if (hasShown) return START_NOT_STICKY
+        val content = intent?.getStringExtra("CONTENT") ?: "우와 우리가 해냈다\n다음에도 같이 하자!"
+        val buttonContent = intent?.getStringExtra("BUTTON_CONTENT") ?: "완료!"
+        val durationMillis = intent?.getIntExtra("TIMER_DURATION", 2 * 60 * 1000) ?: (2 * 60 * 1000)
+        val isFinished = intent?.getBooleanExtra("IS_FINISHED", false) ?: false
+
+        showOverlay(
+            content = content,
+            buttonContent = buttonContent,
+            durationMillis = durationMillis,
+            isFinished = isFinished
+        )
+        hasShown = true
+
+        return START_NOT_STICKY
     }
     
     override fun onDestroy() {
@@ -70,7 +72,12 @@ class OverlayService : Service() {
     
     override fun onBind(intent: Intent): IBinder? = null
 
-    private fun showOverlay() {
+    private fun showOverlay(
+        content: String,
+        buttonContent: String,
+        durationMillis: Int = 2 * 60 * 1000,
+        isFinished: Boolean
+    ) {
         Log.d("overlayService", "showOverlay() 시작")
         if(composeView != null) {
             Log.d("overlayService", "composeView가 이미 존재함")
@@ -143,7 +150,11 @@ class OverlayService : Service() {
                     composeView?.setContent {
                         Log.d("overlayService", "ComposeView setContent 내부 실행")
                         EarlyBirdComposeTheme {
-                            TimerOverlayContent(
+                            TimerScreen(
+                                content = content,
+                                buttonContent = buttonContent,
+                                durationMillis = durationMillis,
+                                isFinished = isFinished,
                                 onTimerDoneClick = {
                                     val intent = Intent(this@OverlayService, MainActivity::class.java).apply {
                                         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
@@ -187,17 +198,5 @@ class OverlayService : Service() {
             }
             composeView = null
         }
-    }
-}
-
-@Composable
-fun TimerOverlayContent(onTimerDoneClick: () -> Unit) {
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        // TimerScreen을 배경으로 표시
-        TimerScreen(
-            onTimerDoneClick = onTimerDoneClick
-        )
     }
 }

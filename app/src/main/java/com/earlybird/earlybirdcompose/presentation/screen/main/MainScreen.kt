@@ -1,12 +1,5 @@
 package com.earlybird.earlybirdcompose.presentation.screen.main
 
-import android.app.Activity
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
-import android.os.Build
-import android.provider.Settings
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -41,12 +34,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.ActivityCompat.startActivityForResult
-import androidx.core.content.ContextCompat.startForegroundService
 import com.earlybird.earlybirdcompose.R
-import com.earlybird.earlybirdcompose.presentation.screen.timer.OverlayService
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdComposeTheme
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdTheme
+import com.earlybird.earlybirdcompose.util.checkPermission
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -145,7 +136,7 @@ fun MainScreen(
                         backgroundColor = Color(0xFF0FA7CE),
                         textColor = EarlyBirdTheme.colors.white,
                         iconColor = EarlyBirdTheme.colors.mainBlue,
-                        onClick = { /* 원하는 시간에 시작하기 클릭 시 동작 */ }
+                        onClick = onSelectTimeClick
                     )
                     MainActionButton(
                         text = "지금 당장 시작하기 >",
@@ -154,7 +145,13 @@ fun MainScreen(
                         iconColor = EarlyBirdTheme.colors.white,
                         onClick = {
                             //TimerScreen은 백그라운드 작업 또는 시스템 오버레이를 위해 사용되기 때문에 Navigation을 사용못함
-                            checkPermission(context)
+                            checkPermission(
+                                context = context,
+                                content = "우와! 우리가 해냈다\n다음에도 같이 하자!",
+                                buttonContent = "완료!",
+                                durationMillis = 2 * 60 * 1000,
+                                isFinished = false
+                            )
                         }
                     )
                 }
@@ -203,42 +200,6 @@ fun getTodayDateFormatted(): String {
     val today = LocalDate.now()
     val formatter = DateTimeFormatter.ofPattern("M월 d일 E요일", Locale.KOREAN)
     return today.format(formatter)
-}
-
-fun checkPermission(context: Context) {
-    Log.d("MainScreen", "checkPermission() 호출됨")
-    
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {  // 마시멜로우 이상일 경우
-        Log.d("MainScreen", "Android M 이상 버전")
-        if (!Settings.canDrawOverlays(context)) {  // 오버레이 권한 체크
-            Log.d("MainScreen", "오버레이 권한이 없음 - 권한 요청 화면으로 이동")
-            val intent = Intent(
-                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                Uri.parse("package:${context.packageName}")
-            )
-            (context as Activity).startActivityForResult(intent, 0)
-        } else {
-            Log.d("MainScreen", "오버레이 권한 있음 - OverlayService 시작")
-            val serviceIntent = Intent(context, OverlayService::class.java)
-            try {
-                context.startService(serviceIntent)
-                Log.d("MainScreen", "OverlayService 시작 요청 완료")
-            } catch (e: Exception) {
-                Log.e("MainScreen", "OverlayService 시작 실패: ${e.message}")
-                e.printStackTrace()
-            }
-        }
-    } else {
-        Log.d("MainScreen", "Android M 미만 버전 - OverlayService 시작")
-        val serviceIntent = Intent(context, OverlayService::class.java)
-        try {
-            context.startService(serviceIntent)
-            Log.d("MainScreen", "OverlayService 시작 요청 완료")
-        } catch (e: Exception) {
-            Log.e("MainScreen", "OverlayService 시작 실패: ${e.message}")
-            e.printStackTrace()
-        }
-    }
 }
 
 @Preview(showBackground = true)
