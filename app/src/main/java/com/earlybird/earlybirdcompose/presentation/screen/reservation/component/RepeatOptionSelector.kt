@@ -37,8 +37,10 @@ import com.earlybird.earlybirdcompose.R
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdTheme
 
 @Composable
-fun RepeatOptionSelector(){
-    var isRepeating by remember { mutableStateOf(false) }
+fun RepeatOptionSelector(
+    isRepeating: Boolean = true,
+    onRepeatChange: (Boolean) -> Unit = {}
+){
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -74,15 +76,15 @@ fun RepeatOptionSelector(){
                 RepeatOptionButton(
                     text = "반복 알람",
                     painter = painterResource(R.drawable.reservation_repeat_icon),
-                    selected = !isRepeating,
-                    onClick = { isRepeating = false }
+                    selected = isRepeating,
+                    onClick = { onRepeatChange(true) }
                 )
 
                 RepeatOptionButton(
                     text = "한 번 알람",
                     painter = painterResource(R.drawable.reservation_once_icon),
-                    selected = isRepeating,
-                    onClick = { isRepeating = true }
+                    selected = !isRepeating,
+                    onClick = { onRepeatChange(false) }
                 )
             }
         }

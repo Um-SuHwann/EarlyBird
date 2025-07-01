@@ -31,8 +31,10 @@ import androidx.compose.ui.unit.sp
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdTheme
 
 @Composable
-fun VibrationSelector(){
-    var isVibrationEnabled by remember { mutableStateOf(true) }
+fun VibrationSelector(
+    isVibrationEnabled: Boolean,
+    onVibrationChange: (Boolean) -> Unit
+){
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -56,7 +58,7 @@ fun VibrationSelector(){
             )
             Switch(
                 checked = isVibrationEnabled,
-                onCheckedChange = { isVibrationEnabled = it }, // 스위치를 눌렀을 때 저 변수로 결과 값이 전달된다.
+                onCheckedChange = { onVibrationChange(!isVibrationEnabled) }, // 스위치를 눌렀을 때 저 변수로 결과 값이 전달된다.
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = EarlyBirdTheme.colors.white,
                     uncheckedThumbColor = EarlyBirdTheme.colors.white,
@@ -72,5 +74,5 @@ fun VibrationSelector(){
 @Preview(showBackground = true)
 @Composable
 fun VibrationSelectorPreview(){
-    VibrationSelector()
+    VibrationSelector(isVibrationEnabled = true, onVibrationChange = {})
 }

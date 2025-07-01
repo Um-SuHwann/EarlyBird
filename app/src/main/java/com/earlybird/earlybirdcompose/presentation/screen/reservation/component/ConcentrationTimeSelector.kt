@@ -1,6 +1,5 @@
 package com.earlybird.earlybirdcompose.presentation.screen.reservation.component
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -21,10 +20,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,8 +33,10 @@ import com.earlybird.earlybirdcompose.R
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdTheme
 
 @Composable
-fun ConcentrationTimeSelector() {
-    var selectedTime by remember { mutableStateOf<String?>(null) }
+fun ConcentrationTimeSelector(
+    focusDuration: Int,
+    onFocusDuration: (Int) -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -79,19 +76,18 @@ fun ConcentrationTimeSelector() {
             Spacer(modifier = Modifier.height(16.dp))
             TimeSelectGrid(
                 onSelect = {
-                    selectedTime = it
+                    onFocusDuration(it)
                 },
-                selectedTime = selectedTime
+                selectedTime = focusDuration
             )
         }
     }
 }
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TimeSelectGrid(
-    timeOptions: List<String> = listOf("2분", "5분", "15분", "30분", "60분", "90분"),
-    selectedTime: String?,
-    onSelect: (String) -> Unit
+    timeOptions: List<Int> = listOf(2, 5, 15, 30, 60, 90),
+    selectedTime: Int,
+    onSelect: (Int) -> Unit
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
@@ -115,7 +111,7 @@ fun TimeSelectGrid(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = time,
+                    text = "${time}분",
                     fontSize = 20.sp,
                     color = if (isSelected) EarlyBirdTheme.colors.white else Color(0xFF838383),
                     fontWeight = FontWeight.SemiBold
@@ -127,5 +123,8 @@ fun TimeSelectGrid(
 @Preview(showBackground = true)
 @Composable
 fun ConcentrationTimeSelectorPreview(){
-    ConcentrationTimeSelector()
+    ConcentrationTimeSelector(
+        focusDuration = 2,
+        onFocusDuration = {}
+    )
 }

@@ -1,5 +1,6 @@
 package com.earlybird.earlybirdcompose.presentation.screen.reservation
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -42,12 +43,12 @@ fun ReservationScreen(
 ) {
     //알람 등록할 때 쓰는 정보들
     var todoText by remember { mutableStateOf("") }
-    var selectedHour by remember { mutableStateOf("08") }
-    var selectedMinute by remember { mutableStateOf("00") }
+    var selectedHour by remember { mutableStateOf(8) }
+    var selectedMinute by remember { mutableStateOf(0) }
     var selectedPa by remember { mutableStateOf("AM") }
     var isRepeating by remember { mutableStateOf(true) }
     var isVibrationEnabled by remember { mutableStateOf(true) }
-    var focusDuration by remember { mutableStateOf(2) }
+    var focusDuration by remember { mutableStateOf(0) }
 
     //컴포넌트 재사용을 위한 스텝
     var currentStep by remember { mutableStateOf(1) }
@@ -90,25 +91,34 @@ fun ReservationScreen(
             // 시간 선택
             WheelPicker(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
-                hourItems = hourItems,
-                minuteItems = minuteItems,
+//                hourItems = hourItems,
+//                minuteItems = minuteItems,
                 paItems = paItems,
-                onHourSelected = { },
-                onMinuteSelected = { },
-                onPaSelected = { },
+                onHourSelected = { selectedHour = it },
+                onMinuteSelected = { selectedMinute = it },
+                onPaSelected = { selectedPa = it },
                 initialHourIndex = initialHourIndex,
                 initialMinuteIndex = initialMinuteIndex,
                 initialPaIndex = initialPaIndex
             )
             Spacer(modifier = Modifier.height(48.dp))
             // 반복 설정
-            RepeatOptionSelector()
+            RepeatOptionSelector(
+                isRepeating = isRepeating,
+                onRepeatChange = { isRepeating = it }
+            )
             Spacer(modifier = Modifier.height(20.dp))
             // 진동 설정
-            VibrationSelector()
+            VibrationSelector(
+                isVibrationEnabled = isVibrationEnabled,
+                onVibrationChange = { isVibrationEnabled = it }
+            )
         }
         else{
-            ConcentrationTimeSelector()
+            ConcentrationTimeSelector(
+                focusDuration = focusDuration,
+                onFocusDuration = { focusDuration = it }
+            )
         }
         Spacer(modifier = Modifier.height(30.dp))
         // 저장 버튼
@@ -119,14 +129,15 @@ fun ReservationScreen(
                 }else{
                     val alarmInfo = AlarmInfo(
                         todo = todoText,
-                        hour = selectedHour.toInt(),
-                        minute = selectedMinute.toInt(),
+                        hour = selectedHour,
+                        minute = selectedMinute,
                         amPm = selectedPa,
                         isRepeating = isRepeating,
                         isVibrationEnabled = isVibrationEnabled,
                         focusDurationMinutes = focusDuration
                     )
                     onSaveAlarm(alarmInfo)
+                    Log.d("reservation", alarmInfo.toString())
                 }
             },
             modifier = Modifier

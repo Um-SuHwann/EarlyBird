@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -31,11 +32,11 @@ import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdTheme
 @Composable
 fun WheelPicker(
     modifier: Modifier = Modifier,
-    hourItems: List<String>,
-    minuteItems: List<String>,
+    hourItems: List<Int> = (1..12).toList(),
+    minuteItems: List<Int> = (0..59).toList(),
     paItems: List<String>,
-    onHourSelected: (String) -> Unit,
-    onMinuteSelected: (String) -> Unit,
+    onHourSelected: (Int) -> Unit,
+    onMinuteSelected: (Int) -> Unit,
     onPaSelected: (String) -> Unit,
     initialHourIndex: Int = 0,
     initialMinuteIndex: Int = 0,
@@ -55,6 +56,15 @@ fun WheelPicker(
     val selectedHourIndex by remember { derivedStateOf { hourListState.firstVisibleItemIndex + 1 } }
     val selectedMinuteIndex by remember { derivedStateOf { minuteListState.firstVisibleItemIndex + 1 } }
     val selectedPaIndex by remember { derivedStateOf { paListState.firstVisibleItemIndex } }
+
+    val selectedHour by remember { derivedStateOf { repeatedHours.getOrElse(hourListState.firstVisibleItemIndex + 1) { hourItems.first() } } }
+    val selectedMinute by remember { derivedStateOf { repeatedMinutes.getOrElse(minuteListState.firstVisibleItemIndex + 1) { minuteItems.first() } } }
+    val selectedPa by remember { derivedStateOf { paItems.getOrElse(paListState.firstVisibleItemIndex.coerceIn(0, paItems.lastIndex)) { paItems.first() } } }
+
+    LaunchedEffect(selectedHour) { onHourSelected(selectedHour) }
+    LaunchedEffect(selectedMinute) { onMinuteSelected(selectedMinute) }
+    LaunchedEffect(selectedPa) { onPaSelected(selectedPa) }
+
     Row(
         modifier = modifier
             .height(listHeight)
@@ -80,12 +90,11 @@ fun WheelPicker(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(itemHeight)
-                        .clickable { onHourSelected(hour) },
+                        .height(itemHeight),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = hour,
+                        text = "%02d".format(hour),
                         textAlign = TextAlign.Center,
                         color = if (isSelected) EarlyBirdTheme.colors.black else Color(0xFFD3D3D3),
                         fontSize = if (isSelected) 40.sp else 24.sp,
@@ -110,12 +119,11 @@ fun WheelPicker(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(itemHeight)
-                        .clickable { onMinuteSelected(minute) },
+                        .height(itemHeight),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = minute,
+                        text = "%02d".format(minute),
                         textAlign = TextAlign.Center,
                         color = if (isSelected) EarlyBirdTheme.colors.black else Color(0xFFD3D3D3),
                         fontSize = if (isSelected) 40.sp else 24.sp,
@@ -142,8 +150,7 @@ fun WheelPicker(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(itemHeight)
-                        .clickable { onPaSelected(pa) },
+                        .height(itemHeight),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -164,13 +171,9 @@ fun WheelPicker(
 @Preview(showBackground = true)
 @Composable
 fun WheelPickerPreview() {
-    val hourItems = (0..23).map { "%02d".format(it) }
-    val minuteItems = (0..59).map { "%02d".format(it) }
     val paItems = listOf("AM", "PM")
 
     WheelPicker(
-        hourItems = hourItems,
-        minuteItems = minuteItems,
         paItems = paItems,
         onHourSelected = {},
         onMinuteSelected = {},
