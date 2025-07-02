@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import com.earlybird.earlybirdcompose.R
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdComposeTheme
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdTheme
+import com.earlybird.earlybirdcompose.util.checkPermission
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -46,6 +48,7 @@ fun MainScreen(
     onStartNowClick: () -> Unit = {},
     onSettingClick: () -> Unit = {}
 ) {
+    val context = LocalContext.current
     val backgroundColor = Brush.verticalGradient(
         colors = listOf(Color(0xFFEAF7FA), Color(0xFF8CE6FF))
     )
@@ -133,14 +136,23 @@ fun MainScreen(
                         backgroundColor = Color(0xFF0FA7CE),
                         textColor = EarlyBirdTheme.colors.white,
                         iconColor = EarlyBirdTheme.colors.mainBlue,
-                        onClick = { /* 원하는 시간에 시작하기 클릭 시 동작 */ }
+                        onClick = onSelectTimeClick
                     )
                     MainActionButton(
                         text = "지금 당장 시작하기 >",
                         backgroundColor = Color.White,
                         textColor = EarlyBirdTheme.colors.mainBlue,
                         iconColor = EarlyBirdTheme.colors.white,
-                        onClick = onStartNowClick
+                        onClick = {
+                            //TimerScreen은 백그라운드 작업 또는 시스템 오버레이를 위해 사용되기 때문에 Navigation을 사용못함
+                            checkPermission(
+                                context = context,
+                                content = "우와! 우리가 해냈다\n다음에도 같이 하자!",
+                                buttonContent = "완료!",
+                                durationMillis = 2 * 60 * 1000,
+                                isFinished = false
+                            )
+                        }
                     )
                 }
             }
@@ -184,61 +196,12 @@ fun MainActionButton(
     }
 }
 
-@Composable
-fun HeaderSection() {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 48.dp) // 설정 버튼 아래
-            .background(
-                color = Color.White,
-                shape = RoundedCornerShape(20.dp)
-            ),
-    ) {
-        Text(
-            text = "6월 18일 수요일",
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.DarkGray
-        )
-        ChatBubble(text = "나는 할 일을 미루지 않는 사람이 될거야!", isLeft = true, color = Color(0xFF0288D1), textColor = Color.White)
-    }
-}
-
 fun getTodayDateFormatted(): String {
     val today = LocalDate.now()
     val formatter = DateTimeFormatter.ofPattern("M월 d일 E요일", Locale.KOREAN)
     return today.format(formatter)
 }
 
-
-@Composable
-fun ChatBubble(
-    text: String,
-    isLeft: Boolean = true,
-    color: Color = if (isLeft) Color(0xFFE0F7FA) else Color(0xFFFFFFFF),
-    textColor: Color = Color.Black
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        horizontalArrangement = if (isLeft) Arrangement.Start else Arrangement.End
-    ) {
-        Surface(
-            color = color,
-            shape = RoundedCornerShape(20.dp),
-            shadowElevation = 2.dp
-        ) {
-            Text(
-                text = text,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-                fontSize = 14.sp,
-                color = textColor
-            )
-        }
-    }
-}
 @Preview(showBackground = true)
 @Composable
 fun MainScreenPreview(){
