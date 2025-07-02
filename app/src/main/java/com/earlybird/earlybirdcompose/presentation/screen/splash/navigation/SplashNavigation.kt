@@ -6,7 +6,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.earlybird.earlybirdcompose.presentation.screen.splash.SplashRoute
 
-fun NavGraphBuilder.splashGraph(
+fun NavGraphBuilder.splashScreen(
     navController: NavController,
     startIntent: Intent,
     navigateToLogin: () -> Unit,

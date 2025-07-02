@@ -4,20 +4,13 @@ import android.content.Intent
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import com.earlybird.earlybirdcompose.presentation.screen.main.MainScreen
+import com.earlybird.earlybirdcompose.presentation.screen.splash.SplashRoute
 
 fun NavGraphBuilder.mainGraph(
     navController: NavController,
     startIntent: Intent,
 ) {
     composable("main") {
-        MainScreen(
-            onSelectTimeClick = {
-                navController.navigate("reservation")
-            },
-            onStartNowClick = {
-                navController.navigate("timer_overlay")
-            }
-        )
+
     }
 }
