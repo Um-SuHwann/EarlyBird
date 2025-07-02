@@ -10,6 +10,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.earlybird.earlybirdcompose.R
 import android.Manifest
+import android.graphics.BitmapFactory
 import android.util.Log
 
 object NotificationHelper {
@@ -33,9 +34,10 @@ object NotificationHelper {
 
         val builder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(smallIconRes)
+            .setLargeIcon(BitmapFactory.decodeResource(context.resources, smallIconRes))
             .setContentTitle(title)
             .setContentText(message)
-            .setAutoCancel(true)
+            .setAutoCancel(true) //사용자가 탭하면 자동으로 알림 제거
             .setPriority(NotificationCompat.PRIORITY_HIGH)
 
         Log.d("AlarmScheduler","알람 만들기")
@@ -48,7 +50,6 @@ object NotificationHelper {
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
         ) {
             NotificationManagerCompat.from(context).notify(notificationId, builder.build())
-            Log.d("AlarmScheduler","성공")
         } else {
             Log.d("AlarmScheduler","실패함")
         }
@@ -72,7 +73,6 @@ object NotificationHelper {
             }
             val manager = context.getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(channel)
-            Log.d("AlarmScheduler","알람 채널 만들기")
         }
     }
 }

@@ -16,22 +16,19 @@ object AlarmScheduler {
         alarmType: AlarmType,
         alarmInfo: AlarmInfo? = null,
     ) {
+        Log.d("Alarm","알람 예약")
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         val hour = alarmInfo?.hour ?: alarmType.defaultHour
         val minute = alarmInfo?.minute ?: alarmType.defaultMinute
         val amPm = alarmInfo?.amPm ?: alarmType.defaultPa
-        val vibration = alarmInfo?.isVibrationEnabled ?: alarmType.vibration
 
         val hour24 = if (amPm == "PM" && hour != 12) hour + 12
                     else if (amPm == "AM" && hour == 12) 0
                     else hour
 
         val intent = Intent(context, AlarmReceiver::class.java).apply {
-            putExtra("hour", hour24)
-            putExtra("minute", minute)
-            putExtra("pa", amPm)
-            putExtra("vibration", vibration)
+            putExtra("alarmInfo", alarmInfo)
             putExtra("requestCode", alarmType.requestCode)
         }
 
