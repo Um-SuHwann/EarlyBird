@@ -1,6 +1,11 @@
 package com.earlybird.earlybirdcompose.presentation.screen.reservation
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -11,6 +16,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -25,7 +31,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import com.earlybird.earlybirdcompose.R
+import com.earlybird.earlybirdcompose.alarm.AlarmScheduler
+import com.earlybird.earlybirdcompose.alarm.AlarmType
 import com.earlybird.earlybirdcompose.data.model.AlarmInfo
 import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.BackTopBar
 import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.ConcentrationTimeSelector
@@ -70,6 +79,27 @@ fun ReservationScreen(
     val initialPaIndex = if (currentTime.hour >= 12) 1 else 0
 
     val context = LocalContext.current
+
+    //권한 요청 부분(나중에 코드를 다른 곳으로 빼서 권한 요청을 하면 좋을 것 같다)
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            Log.d("Permission", "알림 권한 허용됨")
+        } else {
+            Log.d("Permission", "알림 권한 거부됨")
+        }
+    }
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize(),
@@ -147,6 +177,11 @@ fun ReservationScreen(
                         selectedHour,
                         selectedMinute,
                         selectedPa
+                    )
+                    AlarmScheduler.scheduleAlarm(
+                        context = context,
+                        alarmType = AlarmType.USER,
+                        alarmInfo = alarmInfo,
                     )
                     val message = "${hoursLeft}시간 ${minutesLeft}분 후에\n같이 시작해보자!"
                     //알람 저장 확인
