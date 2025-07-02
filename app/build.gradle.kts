@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("kotlin-parcelize")
 }
 
 android {
@@ -41,9 +40,6 @@ android {
 }
 
 dependencies {
-    implementation("androidx.lifecycle:lifecycle-runtime:2.9.1")
-    implementation("androidx.lifecycle:lifecycle-viewmodel:2.9.1")
-    implementation("androidx.savedstate:savedstate:1.3.0")
     implementation("androidx.navigation:navigation-compose:2.9.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
