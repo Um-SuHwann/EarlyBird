@@ -3,9 +3,11 @@ package com.earlybird.earlybirdcompose.alarm
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.PowerManager
 import android.util.Log
 import com.earlybird.earlybirdcompose.R
 import com.earlybird.earlybirdcompose.data.model.AlarmInfo
+import com.earlybird.earlybirdcompose.presentation.screen.call.CallActivity
 
 //예약 시간이 되면 호출되는 BroadcastReceiver
 
@@ -23,6 +25,16 @@ class  AlarmReceiver : BroadcastReceiver(){
                 notificationId = requestCode,
                 smallIconRes = R.drawable.push_alarm_icon
             )
+
+            // CallActivity 실행
+            val callIntent = Intent(context, CallActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or
+                        Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                        Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                putExtra("todoTask", alarmInfo.todo)
+            }
+            context.startActivity(callIntent)
+
             if(alarmInfo.isRepeating){
                 val alarmType = AlarmType.fromRequestCode(requestCode)
                 if (alarmType != null) {
@@ -36,6 +48,5 @@ class  AlarmReceiver : BroadcastReceiver(){
                 }
             }
         }
-
     }
 }
