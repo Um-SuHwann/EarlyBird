@@ -32,6 +32,7 @@ class  AlarmReceiver : BroadcastReceiver(){
                         Intent.FLAG_ACTIVITY_CLEAR_TOP or
                         Intent.FLAG_ACTIVITY_SINGLE_TOP)
                 putExtra("todoTask", alarmInfo.todo)
+                putExtra("durationMillis", alarmInfo.focusDurationMinutes)
             }
             context.startActivity(callIntent)
 

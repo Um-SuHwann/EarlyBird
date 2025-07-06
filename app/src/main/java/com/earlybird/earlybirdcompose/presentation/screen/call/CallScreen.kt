@@ -42,6 +42,7 @@ import kotlinx.coroutines.delay
 fun CallScreen(
     callerName: String = "얼리버드",
     todoTask: String = "",
+    durationMillis: Int,
     onStartCall: () -> Unit = {}
 ) {
     var isCallStarted by remember { mutableStateOf(false) }
@@ -160,6 +161,6 @@ fun CallScreen(
 @Composable
 fun CallScreenPreview() {
     EarlyBirdComposeTheme {
-        CallScreen()
+        CallScreen(durationMillis = 2*60*1000)
     }
 }

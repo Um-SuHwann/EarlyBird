@@ -2,6 +2,7 @@ package com.earlybird.earlybirdcompose.presentation.screen.call
 
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -26,16 +27,19 @@ class CallActivity : ComponentActivity() {
         val todoTask = intent.getStringExtra("todoTask").let {
             if (it.isNullOrBlank()) "할 일을" else it
         }
+        val durationMillis = intent.getIntExtra("durationMillis", 2).let { it * 60 * 1000 }
+        Log.d("call", "$durationMillis")
         setContent {
             EarlyBirdComposeTheme {
                 CallScreen(
                     todoTask = todoTask,
+                    durationMillis = durationMillis,
                     onStartCall = {
                         com.earlybird.earlybirdcompose.util.checkPermission(
                             context = this,
                             content = "우와! 우리가 해냈다\n다음에도 같이 하자!",
                             buttonContent = "완료!",
-                            durationMillis = 2 * 60 * 1000,
+                            durationMillis = durationMillis,
                             isFinished = false
                         )
                         finish()
