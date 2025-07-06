@@ -2,6 +2,7 @@ package com.earlybird.earlybirdcompose.presentation.screen.timer.component
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -20,7 +21,7 @@ import androidx.compose.ui.unit.sp
 // 실제 타이머 기능을 하는 compose
 @Composable
 fun TimerContent(progress: Float, durationMillis: Int, color: Color) {
-    Canvas(modifier = Modifier.fillMaxSize()) {
+    Canvas(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         val backgroundStrokeWidth = 9.dp.toPx()
         val progressStrokeWidth = 18.dp.toPx()
         val radius = size.minDimension / 2 - progressStrokeWidth / 2

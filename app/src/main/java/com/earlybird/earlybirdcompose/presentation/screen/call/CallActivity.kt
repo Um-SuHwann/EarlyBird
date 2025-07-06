@@ -38,6 +38,7 @@ class CallActivity : ComponentActivity() {
                             durationMillis = 2 * 60 * 1000,
                             isFinished = false
                         )
+                        finish()
                     }
                 )
             }

@@ -9,10 +9,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -63,6 +64,7 @@ fun CallScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .padding(WindowInsets.systemBars.asPaddingValues())
             .background(Color(0xFF101010)),
     ) {
         Column(
@@ -70,7 +72,6 @@ fun CallScreen(
             verticalArrangement = Arrangement.Top,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(WindowInsets.systemBars.asPaddingValues())
         ) {
             Spacer(modifier = Modifier.height(42.dp))
             Text(
@@ -87,34 +88,60 @@ fun CallScreen(
         }
         Box(
             modifier = Modifier
-                .fillMaxSize(),
-            contentAlignment = Alignment.Center
+                .fillMaxSize()
+                .padding(top = 224.dp),
+            contentAlignment = Alignment.TopCenter
         ) {
             when {
                 !isCallStarted -> {
                     Image(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.width(218.dp),
                         painter = painterResource(R.drawable.call_bird_calling_icon),
                         contentScale = ContentScale.Fit,
                         contentDescription = "새 이미지"
                     )
                 }
                 !showCountdownText -> {
-                    Image(
-                        modifier = Modifier.fillMaxWidth(),
-                        painter = painterResource(R.drawable.call_bird_called_icon),
-                        contentScale = ContentScale.Fit,
-                        contentDescription = "새 이미지"
-                    )
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Image(
+                            modifier = Modifier.width(218.dp),
+                            painter = painterResource(R.drawable.call_bird_called_icon),
+                            contentScale = ContentScale.Fit,
+                            contentDescription = "새 이미지"
+                        )
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Text(
+                            text = "전화받아줘서 고마워!\n이미 절반은 성공한거야",
+                            fontSize = 25.sp,
+                            color = EarlyBirdTheme.colors.white,
+                            fontWeight = FontWeight.Medium,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
-                showCountdownText && !isCountdownFinished -> {
-                    Text(
-                        text = "$countdown",
-                        fontSize = 90.sp,
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+            }
+        }
+        if (showCountdownText && !isCountdownFinished){
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.align(Alignment.Center)
+            ) {
+                Text(
+                    text = "$countdown",
+                    fontSize = 90.sp,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(85.dp)) // 숫자와 텍스트 사이 간격
+                Text(
+                    text = "${countdown}초 뒤에 같이 시작하러 가는거야!\n설마 안하진 않겠지?",
+                    fontSize = 25.sp,
+                    color = Color.White,
+                    fontWeight = FontWeight.Medium,
+                    textAlign = TextAlign.Center
+                )
             }
         }
         // 하단 스와이프 버튼 될 예정
