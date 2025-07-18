@@ -2,4 +2,5 @@
     <string name="app_name">얼리버드</string>
     <string name="title_activity_main_screen">MainScreen</string>
     <string name="title_activity_onboarding_screen">OnboardingScreen</string>
+    <string name="title_activity_call">CallActivity</string>
 </resources>
