@@ -41,6 +41,7 @@ android {
 }
 
 dependencies {
+    implementation("com.android.billingclient:billing-ktx:8.0.0")
     implementation("androidx.lifecycle:lifecycle-runtime:2.9.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel:2.9.1")
     implementation("androidx.savedstate:savedstate:1.3.0")
