@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -36,8 +38,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.earlybird.earlybirdcompose.R
 import com.earlybird.earlybirdcompose.presentation.screen.main.component.BirdImageComponent
-import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdComposeTheme
 import com.earlybird.earlybirdcompose.presentation.screen.main.component.DateComponent
+import com.earlybird.earlybirdcompose.presentation.screen.main.component.SpeechBubbleComponent
+import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdComposeTheme
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdTheme
 import com.earlybird.earlybirdcompose.util.checkPermission
 
@@ -81,86 +84,62 @@ fun MainScreen(
         Column(
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .padding(top = 96.dp)
+                .padding(top = 96.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             BirdImageComponent(
                 dayStreak = 5,
                 modifier = Modifier
             )
+            SpeechBubbleComponent(
+                text = "Overthinking? Try 2 min. Let’s go\uD83C\uDFB6",
+                modifier = Modifier.padding(top = 16.dp)
+            )
         }
-//        Box(
+
+//        Column(
+//            verticalArrangement = Arrangement.spacedBy(20.dp),
 //            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(17.dp)
-//        ){
+//                .align(Alignment.BottomCenter)
+//        ) {
 //            Surface(
-//                modifier = Modifier
-//                    .align(Alignment.TopCenter)
-//                    .padding(top = 179.dp),
 //                color = EarlyBirdTheme.colors.white,
-//                shape = RoundedCornerShape(16.dp),
-//                shadowElevation = 2.dp
+//                shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp, bottomStart = 0.dp, bottomEnd = 0.dp),
+//                modifier = Modifier
+//                    .fillMaxWidth()
 //            ) {
-//                EditableMotivationalBox()
+//                Column(
+//                    verticalArrangement = Arrangement.spacedBy(16.dp),
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(horizontal = 20.dp, vertical = 20.dp)
+//                ) {
+//                    MainActionButton(
+//                        text = "원하는 시간에 시작하기 >",
+//                        backgroundColor = Color(0xFF0FA7CE),
+//                        textColor = EarlyBirdTheme.colors.white,
+//                        iconColor = EarlyBirdTheme.colors.mainBlue,
+//                        onClick = onSelectTimeClick
+//                    )
+//                    MainActionButton(
+//                        text = "지금 당장 시작하기 >",
+//                        backgroundColor = Color.White,
+//                        textColor = EarlyBirdTheme.colors.mainBlue,
+//                        iconColor = EarlyBirdTheme.colors.white,
+//                        onClick = {
+//                            //TimerScreen은 백그라운드 작업 또는 시스템 오버레이를 위해 사용되기 때문에 Navigation을 사용못함
+//                            checkPermission(
+//                                context = context,
+//                                content = "우와! 우리가 해냈다\n다음에도 같이 하자!",
+//                                buttonContent = "완료!",
+//                                durationMillis = 2 * 60 * 1000,
+//                                isFinished = false
+//                            )
+//                        }
+//                    )
+//                }
 //            }
 //        }
-//        Box(
-//            modifier = Modifier
-//                .align(Alignment.TopStart)
-//                .padding(top = 270.dp, start = 10.dp)
-//        ){
-//            Image(
-//                painter = painterResource(R.drawable.main_bird_icon),
-//                contentDescription = "main 캐릭터",
-//                modifier = Modifier
-//                    .width(356.dp)
-//                    .height(220.dp),
-//                contentScale = ContentScale.Fit
-//            )
-//        }
-        Column(
-            verticalArrangement = Arrangement.spacedBy(20.dp),
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-        ) {
-            Surface(
-                color = EarlyBirdTheme.colors.white,
-                shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp, bottomStart = 0.dp, bottomEnd = 0.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 20.dp)
-                ) {
-                    MainActionButton(
-                        text = "원하는 시간에 시작하기 >",
-                        backgroundColor = Color(0xFF0FA7CE),
-                        textColor = EarlyBirdTheme.colors.white,
-                        iconColor = EarlyBirdTheme.colors.mainBlue,
-                        onClick = onSelectTimeClick
-                    )
-                    MainActionButton(
-                        text = "지금 당장 시작하기 >",
-                        backgroundColor = Color.White,
-                        textColor = EarlyBirdTheme.colors.mainBlue,
-                        iconColor = EarlyBirdTheme.colors.white,
-                        onClick = {
-                            //TimerScreen은 백그라운드 작업 또는 시스템 오버레이를 위해 사용되기 때문에 Navigation을 사용못함
-                            checkPermission(
-                                context = context,
-                                content = "우와! 우리가 해냈다\n다음에도 같이 하자!",
-                                buttonContent = "완료!",
-                                durationMillis = 2 * 60 * 1000,
-                                isFinished = false
-                            )
-                        }
-                    )
-                }
-            }
-        }
     }
 }
 
