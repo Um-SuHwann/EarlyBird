@@ -16,14 +16,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,7 +54,8 @@ import com.earlybird.earlybirdcompose.util.checkPermission
 fun MainScreen(
     onSelectTimeClick: () -> Unit = {},
     onStartNowClick: () -> Unit = {},
-    onSettingClick: () -> Unit = {}
+    onSettingClick: () -> Unit = {},
+    onAddTodoClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val backgroundColor = EarlyBirdTheme.colors.white
@@ -117,6 +122,24 @@ fun MainScreen(
                     modifier = Modifier.padding(top = 24.dp)
                 )
             }
+        }
+        
+        // FloatingActionButton for adding todo
+        FloatingActionButton(
+            onClick = onAddTodoClick,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(30.dp)
+                .size(64.dp),
+            containerColor = Color(0xFF06518A),
+            shape = CircleShape
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.main_plus_icon),
+                contentDescription = "Add Todo",
+                modifier = Modifier.size(32.dp),
+                contentScale = ContentScale.Fit
+            )
         }
 
 //        Column(
