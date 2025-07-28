@@ -40,6 +40,8 @@ import com.earlybird.earlybirdcompose.R
 import com.earlybird.earlybirdcompose.presentation.screen.main.component.BirdImageComponent
 import com.earlybird.earlybirdcompose.presentation.screen.main.component.DateComponent
 import com.earlybird.earlybirdcompose.presentation.screen.main.component.SpeechBubbleComponent
+import com.earlybird.earlybirdcompose.presentation.screen.main.component.TodoItem
+import com.earlybird.earlybirdcompose.presentation.screen.main.component.TodoListComponent
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdComposeTheme
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdTheme
 import com.earlybird.earlybirdcompose.util.checkPermission
@@ -92,9 +94,29 @@ fun MainScreen(
                 modifier = Modifier
             )
             SpeechBubbleComponent(
-                text = "Overthinking? Try 2 min. Let’s go\uD83C\uDFB6",
+                text = "Overthinking? Try 2 min. Let's go\uD83C\uDFB6",
                 modifier = Modifier.padding(top = 16.dp)
             )
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(horizontal = 20.dp)
+                    .padding(top = 40.dp)
+            ){
+                TodoListComponent(
+                    todoItems = listOf(
+                        TodoItem(1, "Complete morning routine", reservedTime = "07:00 AM"),
+                        TodoItem(2, "Read for 30 minutes", timerDuration = "30 min", hasTimer = true),
+                        TodoItem(3, "Exercise for 20 minutes", reservedTime = "08:00 AM", timerDuration = "20 min", hasTimer = true),
+                        TodoItem(4, "Call mom", hasCall = true),
+                        TodoItem(5, "Plan tomorrow's schedule", timerDuration = "15 min", hasTimer = true, hasCall = true)
+                    ),
+                    onStartClick = { todoItem ->
+                        // Handle todo item start click
+                    },
+                    modifier = Modifier.padding(top = 24.dp)
+                )
+            }
         }
 
 //        Column(
