@@ -25,6 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.earlybird.earlybirdcompose.R
+import com.earlybird.earlybirdcompose.presentation.screen.main.component.BirdImageComponent
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdComposeTheme
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdTheme
 import java.time.LocalDate

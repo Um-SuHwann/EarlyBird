@@ -35,6 +35,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.earlybird.earlybirdcompose.R
+import com.earlybird.earlybirdcompose.presentation.screen.main.component.BirdImageComponent
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdComposeTheme
 import com.earlybird.earlybirdcompose.presentation.screen.main.component.DateComponent
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdTheme
@@ -74,39 +75,49 @@ fun MainScreen(
         DateComponent(
             modifier = Modifier
                 .align(Alignment.TopStart)
-                .padding(start = 20.dp, top = 16.dp),
+                .padding(start = 20.dp, top = 20.dp),
             dayStreak = 5
         )
-        Box(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(17.dp)
-        ){
-            Surface(
+                .align(Alignment.TopCenter)
+                .padding(top = 96.dp)
+        ) {
+            BirdImageComponent(
+                dayStreak = 5,
                 modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 179.dp),
-                color = EarlyBirdTheme.colors.white,
-                shape = RoundedCornerShape(16.dp),
-                shadowElevation = 2.dp
-            ) {
-                EditableMotivationalBox()
-            }
-        }
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(top = 270.dp, start = 10.dp)
-        ){
-            Image(
-                painter = painterResource(R.drawable.main_bird_icon),
-                contentDescription = "main 캐릭터",
-                modifier = Modifier
-                    .width(356.dp)
-                    .height(220.dp),
-                contentScale = ContentScale.Fit
             )
         }
+//        Box(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(17.dp)
+//        ){
+//            Surface(
+//                modifier = Modifier
+//                    .align(Alignment.TopCenter)
+//                    .padding(top = 179.dp),
+//                color = EarlyBirdTheme.colors.white,
+//                shape = RoundedCornerShape(16.dp),
+//                shadowElevation = 2.dp
+//            ) {
+//                EditableMotivationalBox()
+//            }
+//        }
+//        Box(
+//            modifier = Modifier
+//                .align(Alignment.TopStart)
+//                .padding(top = 270.dp, start = 10.dp)
+//        ){
+//            Image(
+//                painter = painterResource(R.drawable.main_bird_icon),
+//                contentDescription = "main 캐릭터",
+//                modifier = Modifier
+//                    .width(356.dp)
+//                    .height(220.dp),
+//                contentScale = ContentScale.Fit
+//            )
+//        }
         Column(
             verticalArrangement = Arrangement.spacedBy(20.dp),
             modifier = Modifier
