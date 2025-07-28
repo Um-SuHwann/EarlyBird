@@ -36,11 +36,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.earlybird.earlybirdcompose.R
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdComposeTheme
+import com.earlybird.earlybirdcompose.presentation.screen.main.component.DateComponent
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdTheme
 import com.earlybird.earlybirdcompose.util.checkPermission
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 @Composable
 fun MainScreen(
@@ -49,13 +47,11 @@ fun MainScreen(
     onSettingClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
-    val backgroundColor = Brush.verticalGradient(
-        colors = listOf(Color(0xFFEAF7FA), Color(0xFF8CE6FF))
-    )
+    val backgroundColor = EarlyBirdTheme.colors.white
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(brush = backgroundColor)
+            .background(backgroundColor)
             .padding(WindowInsets.systemBars.asPaddingValues())
     ) {
         // 설정 버튼 (오른쪽 상단)
@@ -74,15 +70,12 @@ fun MainScreen(
                 )
             }
         }
-        // 현재 날짜
-        Text(
-            text = getTodayDateFormatted(),
-            fontSize = 26.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF5A5A5A),
+        // 현재 날짜 (왼쪽 위)
+        DateComponent(
             modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 109.dp)
+                .align(Alignment.TopStart)
+                .padding(start = 20.dp, top = 16.dp),
+            dayStreak = 5
         )
         Box(
             modifier = Modifier
@@ -196,11 +189,6 @@ fun MainActionButton(
     }
 }
 
-fun getTodayDateFormatted(): String {
-    val today = LocalDate.now()
-    val formatter = DateTimeFormatter.ofPattern("M월 d일 E요일", Locale.KOREAN)
-    return today.format(formatter)
-}
 
 @Preview(showBackground = true)
 @Composable
