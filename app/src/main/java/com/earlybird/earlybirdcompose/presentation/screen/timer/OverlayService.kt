@@ -161,6 +161,10 @@ class OverlayService : Service() {
                                     }
                                     startActivity(intent)
                                     stopSelf()
+                                },
+                                onMoodSelected = { moodValue ->
+                                    Log.d("overlayService", "사용자 기분 상태: $moodValue")
+                                    // 여기서 기분 상태를 저장하거나 서버로 전송할 수 있습니다
                                 }
                             )
                         }

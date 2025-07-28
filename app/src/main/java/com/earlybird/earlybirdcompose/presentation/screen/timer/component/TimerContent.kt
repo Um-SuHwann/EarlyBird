@@ -1,10 +1,13 @@
 package com.earlybird.earlybirdcompose.presentation.screen.timer.component
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -21,29 +24,6 @@ import androidx.compose.ui.unit.sp
 // 실제 타이머 기능을 하는 compose
 @Composable
 fun TimerContent(progress: Float, durationMillis: Int, color: Color) {
-    Canvas(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        val backgroundStrokeWidth = 9.dp.toPx()
-        val progressStrokeWidth = 18.dp.toPx()
-        val radius = size.minDimension / 2 - progressStrokeWidth / 2
-        val center = Offset(size.width / 2, size.height / 2)
-
-        drawCircle(
-            color = color,
-            center = center,
-            radius = radius,
-            style = Stroke(backgroundStrokeWidth)
-        )
-        drawArc(
-            color = color,
-            startAngle = -90f,
-            sweepAngle = 360f * progress,
-            useCenter = false,
-            style = Stroke(width = progressStrokeWidth, cap = StrokeCap.Round),
-            size = Size(radius * 2, radius * 2),
-            topLeft = Offset(center.x - radius, center.y - radius)
-        )
-    }
-
     val remainingSeconds = (1f - progress) * durationMillis / 1000f
     val totalSeconds = remainingSeconds.toInt()
     val decimal = ((remainingSeconds - totalSeconds) * 100).toInt()
@@ -57,10 +37,36 @@ fun TimerContent(progress: Float, durationMillis: Int, color: Color) {
         }
     }
 
-    Text(
-        text = timeText,
-        fontSize = 40.sp,
-        fontWeight = FontWeight.Bold,
-        color = color
-    )
+    Box(modifier = Modifier.fillMaxSize()) {
+        Canvas(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+            val backgroundStrokeWidth = 9.dp.toPx()
+            val progressStrokeWidth = 18.dp.toPx()
+            val radius = size.minDimension / 2 - progressStrokeWidth / 2
+            val center = Offset(size.width / 2, size.height / 2)
+
+            drawCircle(
+                color = color,
+                center = center,
+                radius = radius,
+                style = Stroke(backgroundStrokeWidth)
+            )
+            drawArc(
+                color = color,
+                startAngle = -90f,
+                sweepAngle = 360f * progress,
+                useCenter = false,
+                style = Stroke(width = progressStrokeWidth, cap = StrokeCap.Round),
+                size = Size(radius * 2, radius * 2),
+                topLeft = Offset(center.x - radius, center.y - radius)
+            )
+        }
+        
+        Text(
+            text = timeText,
+            fontSize = 40.sp,
+            fontWeight = FontWeight.Bold,
+            color = color,
+            modifier = Modifier.align(Alignment.Center)
+        )
+    }
 }

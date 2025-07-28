@@ -13,13 +13,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.earlybird.earlybirdcompose.presentation.screen.timer.component.MoodModal
 import com.earlybird.earlybirdcompose.presentation.screen.timer.component.SlideInImage
 import com.earlybird.earlybirdcompose.presentation.screen.timer.component.TimerContainer
 import com.earlybird.earlybirdcompose.presentation.screen.timer.component.TimerContent
@@ -30,12 +34,13 @@ import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdComposeTheme
 fun TimerScreen(
     content: String,
     buttonContent: String,
-    durationMillis: Int = 2 * 60 * 1000,
+    durationMillis: Int,
     isFinished: Boolean = false,
-    onTimerDoneClick: () -> Unit = {}
+    onTimerDoneClick: () -> Unit = {},
+    onMoodSelected: (Int) -> Unit = {}
 ){
-    Log.d("overlayService", "$content , $buttonContent , $durationMillis , $isFinished")
     val progress = remember { Animatable(if (isFinished) 1f else 0f) }
+    var showMoodModal by remember { mutableStateOf(false) }
     // 타이머 시작
     LaunchedEffect(Unit) {
         if(!isFinished){
@@ -73,9 +78,24 @@ fun TimerScreen(
                 buttonContent = buttonContent,
                 progress = progress.value,
                 durationMillis = durationMillis,
-                onTimerDoneClick = onTimerDoneClick
+                onTimerDoneClick = {
+                    showMoodModal = true
+                }
             )
         }
+        
+        // 기분 상태 모달
+        MoodModal(
+            isVisible = showMoodModal,
+            onMoodSelected = { mood ->
+                onMoodSelected(mood)
+                onTimerDoneClick()
+            },
+            onDismiss = {
+                showMoodModal = false
+                onTimerDoneClick()
+            }
+        )
     }
 }
 
@@ -108,13 +128,13 @@ fun CircleTimer(
 fun TimerScreenPreview(){
     EarlyBirdComposeTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            TimerContainer {
-                TimerDoneContent(
-                    content = "우와! 우리가 해냈다\n다음에도 같이 하자!!",
-                    buttonContent = "완료!",
-                    onClick = { }
-                )
-            }
+            TimerScreen(
+                content = "",
+                buttonContent = "",
+                durationMillis = 2 * 60 * 1000,
+                isFinished= false,
+                onTimerDoneClick = {}
+            )
         }
     }
 }
