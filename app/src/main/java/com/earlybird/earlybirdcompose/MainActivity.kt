@@ -23,10 +23,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.earlybird.earlybirdcompose.presentation.screen.main.MainScreen
 import com.earlybird.earlybirdcompose.presentation.screen.timer.OverlayService
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdComposeTheme
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.MainScope
 
 const val REQUEST_CODE_OVERLAY_PERMISSION = 1001
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -12,11 +12,8 @@ fun NavGraphBuilder.mainGraph(
 ) {
     composable("main") {
         MainScreen(
-            onSelectTimeClick = {
+            onAddTodoClick = {
                 navController.navigate("reservation")
-            },
-            onStartNowClick = {
-                navController.navigate("timer_overlay")
             }
         )
     }

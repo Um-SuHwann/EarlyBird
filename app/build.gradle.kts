@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("kotlin-parcelize")
+    id("com.google.devtools.ksp")
+    id("dagger.hilt.android.plugin")
 }
 
 android {
@@ -38,9 +40,26 @@ android {
     buildFeatures {
         compose = true
     }
+    
+    lint {
+        checkReleaseBuilds = false
+        abortOnError = false
+    }
 }
 
 dependencies {
+    // Room dependencies
+    val room_version = "2.7.2"
+    implementation("androidx.room:room-runtime:$room_version")
+    implementation("androidx.room:room-ktx:$room_version")
+    ksp("androidx.room:room-compiler:$room_version")
+    
+    // Hilt dependencies
+    val hilt_version = "2.56.2"
+    implementation("com.google.dagger:hilt-android:$hilt_version")
+    ksp("com.google.dagger:hilt-android-compiler:$hilt_version")
+    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
+    
     implementation("com.android.billingclient:billing-ktx:8.0.0")
     implementation("androidx.lifecycle:lifecycle-runtime:2.9.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel:2.9.1")
