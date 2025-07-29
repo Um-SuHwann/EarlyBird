@@ -4,19 +4,18 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
-import android.widget.Button
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,11 +26,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,16 +39,12 @@ import com.earlybird.earlybirdcompose.alarm.AlarmScheduler
 import com.earlybird.earlybirdcompose.alarm.AlarmType
 import com.earlybird.earlybirdcompose.data.model.AlarmInfo
 import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.BackTopBar
-import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.ConcentrationTimeSelector
 import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.FeatureSelector
 import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.FeatureState
 import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.Mood
 import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.MoodSelector
-import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.RepeatOptionSelector
-import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.TodoSpeechBubble
+import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.TodoInputField
 import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.TopSpeechBubble
-import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.VibrationSelector
-import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.WheelPicker
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdComposeTheme
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdTheme
 import com.earlybird.earlybirdcompose.util.checkPermission
@@ -96,19 +88,22 @@ fun ReservationScreen(
     val context = LocalContext.current
 
     //새가 말하는 말풍선 내용
-    val speechText = if(currentStep == 2 && selectedMood != null){
-        when(selectedMood){
+    val speechText = if (currentStep == 2 && selectedMood != null) {
+        when (selectedMood) {
             Mood.BAD -> "Though day... Try just one small thing."
             Mood.NORMAL -> "Middle mood! still room to move."
             Mood.GOOD -> "Energy is here! Use it your way"
             else -> "Let's get started!"
         }
-    }else{
+    } else {
         ""
     }
-    
+
     // 디버깅용 로그
-    Log.d("ReservationScreen", "currentStep: $currentStep, selectedMood: $selectedMood, speechText: '$speechText'")
+    Log.d(
+        "ReservationScreen",
+        "currentStep: $currentStep, selectedMood: $selectedMood, speechText: '$speechText'"
+    )
 
     //권한 요청 부분(나중에 코드를 다른 곳으로 빼서 권한 요청을 하면 좋을 것 같다)
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -135,116 +130,130 @@ fun ReservationScreen(
             .fillMaxSize(),
     ) {
         BackTopBar(onBackClick = onBackClick)
-        Spacer(modifier = Modifier.height(16.dp))
-        TopSpeechBubble(
-            modifier = Modifier.padding(horizontal = 12.dp),
-            leftImageRes = R.drawable.reservation_bird_icon,
-            speechText = speechText
-        )
-        Spacer(modifier = Modifier.height(110.dp))
-        Text(
-            text = if(currentStep == 1) "How are you feeling today?" else "Set your To-do list",
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-            color = EarlyBirdTheme.colors.fontBlack,
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            textAlign = TextAlign.Center
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = if(currentStep == 1) "Before we start,\nlet's check in with your emotions" else "What would you like to do?",
-            style = TextStyle(lineHeight = 20.sp),
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium,
-            color = EarlyBirdTheme.colors.fontBlack,
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            textAlign = TextAlign.Center
-        )
-        if(currentStep == 1){
-            // 첫 번째 단계: 기분 선택
-            Spacer(modifier = Modifier.height(40.dp))
-            
-            MoodSelector(
-                selectedMood = selectedMood,
-                onMoodSelected = { selectedMood = it },
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-        }
-        else{
-            // 두 번째 단계: 할 일 입력 및 기능 선택
-            Spacer(modifier = Modifier.height(16.dp))
 
-            FeatureSelector(
-                featureState = featureState,
-                onFeatureChange = { featureState = it },
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-        }
-        Spacer(modifier = Modifier.height(132.dp))
-
-        // 저장 버튼
-        Button(
-            onClick = {
-                if(currentStep == 1){
-                    if(selectedMood != null) {
-                        currentStep = 2
-                        Log.d("reservation", "Selected mood: $selectedMood")
-                    }
-                }else{
-                    Log.d("reservation", "Selected mood: $selectedMood")
-                    Log.d("reservation", "Selected features: $featureState")
-
-                    val alarmInfo = AlarmInfo(
-                        todo = todoText,
-                        hour = selectedHour,
-                        minute = selectedMinute,
-                        amPm = selectedPa,
-                        isRepeating = isRepeating,
-                        isVibrationEnabled = isVibrationEnabled,
-                        focusDurationMinutes = focusDuration
-                    )
-                    onSaveAlarm(alarmInfo)
-                    val (hoursLeft, minutesLeft) = calculateRemainingTime(
-                        selectedHour,
-                        selectedMinute,
-                        selectedPa
-                    )
-                    AlarmScheduler.scheduleAlarm(
-                        context = context,
-                        alarmType = AlarmType.USER,
-                        alarmInfo = alarmInfo,
-                    )
-                    val message = "${hoursLeft}시간 ${minutesLeft}분 후에\n같이 시작해보자!"
-                    //알람 저장 확인
-                    Log.d("reservation", alarmInfo.toString())
-                    checkPermission(
-                        context = context,
-                        content = message,
-                        buttonContent = "좋아!",
-                        durationMillis = focusDuration,
-                        isFinished = true
-                    )
-                }
-            },
+        Column(
             modifier = Modifier
-                .width(216.dp)
-                .height(40.dp)
-                .align(Alignment.CenterHorizontally),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = EarlyBirdTheme.colors.mainBlue,
-                contentColor = EarlyBirdTheme.colors.white
-            ),
-            elevation = ButtonDefaults.buttonElevation(
-                defaultElevation = 3.dp
-            )
-
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
         ) {
-            Text(
-                text = if(currentStep == 1) "Continue" else "Done",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.align(Alignment.CenterVertically)
+            Spacer(modifier = Modifier.height(16.dp))
+            TopSpeechBubble(
+                modifier = Modifier.padding(horizontal = 12.dp),
+                leftImageRes = R.drawable.reservation_bird_icon,
+                speechText = speechText
             )
+            Spacer(modifier = Modifier.height(110.dp))
+            Text(
+                text = if (currentStep == 1) "How are you feeling today?" else "Set your To-do list",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = EarlyBirdTheme.colors.fontBlack,
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = if (currentStep == 1) "Before we start,\nlet's check in with your emotions" else "What would you like to do?",
+                style = TextStyle(lineHeight = 20.sp),
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                color = EarlyBirdTheme.colors.fontBlack,
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                textAlign = TextAlign.Center
+            )
+            if (currentStep == 1) {
+                // 첫 번째 단계: 기분 선택
+                Spacer(modifier = Modifier.height(40.dp))
+
+                MoodSelector(
+                    selectedMood = selectedMood,
+                    onMoodSelected = { selectedMood = it },
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+            } else {
+                // 두 번째 단계: 할 일 입력 및 기능 선택
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // 할일 입력 필드
+                TodoInputField(
+                    value = todoText,
+                    onValueChange = { todoText = it },
+                    placeholder = "Add your task here",
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                FeatureSelector(
+                    featureState = featureState,
+                    onFeatureChange = { featureState = it },
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+            }
+            Spacer(modifier = Modifier.height(110.dp))
+
+            // 저장 버튼
+            Button(
+                onClick = {
+                    if (currentStep == 1) {
+                        if (selectedMood != null) {
+                            currentStep = 2
+                        }
+                    } else {
+                        val alarmInfo = AlarmInfo(
+                            todo = todoText,
+                            hour = selectedHour,
+                            minute = selectedMinute,
+                            amPm = selectedPa,
+                            isRepeating = isRepeating,
+                            isVibrationEnabled = isVibrationEnabled,
+                            focusDurationMinutes = focusDuration
+                        )
+                        onSaveAlarm(alarmInfo)
+                        val (hoursLeft, minutesLeft) = calculateRemainingTime(
+                            selectedHour,
+                            selectedMinute,
+                            selectedPa
+                        )
+                        AlarmScheduler.scheduleAlarm(
+                            context = context,
+                            alarmType = AlarmType.USER,
+                            alarmInfo = alarmInfo,
+                        )
+                        val message = "${hoursLeft}시간 ${minutesLeft}분 후에\n같이 시작해보자!"
+                        //알람 저장 확인
+                        Log.d("reservation", alarmInfo.toString())
+                        checkPermission(
+                            context = context,
+                            content = message,
+                            buttonContent = "좋아!",
+                            durationMillis = focusDuration,
+                            isFinished = true
+                        )
+                    }
+                },
+                modifier = Modifier
+                    .width(216.dp)
+                    .height(40.dp)
+                    .align(Alignment.CenterHorizontally),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = EarlyBirdTheme.colors.mainBlue,
+                    contentColor = EarlyBirdTheme.colors.white
+                ),
+                elevation = ButtonDefaults.buttonElevation(
+                    defaultElevation = 3.dp
+                )
+
+            ) {
+                Text(
+                    text = if (currentStep == 1) "Continue" else "Done",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                )
+            }
+            // 하단 여백 추가 (메뉴바와 겹치지 않도록)
+            Spacer(modifier = Modifier.height(80.dp))
         }
     }
 }
