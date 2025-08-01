@@ -74,17 +74,6 @@ fun ReservationScreen(
 
     val context = LocalContext.current
 
-    //새가 말하는 말풍선 내용
-    val speechText = if (currentStep == 2 && selectedMood != null) {
-        when (selectedMood) {
-            Mood.BAD -> "Though day... Try just one small thing."
-            Mood.NORMAL -> "Middle mood! still room to move."
-            Mood.GOOD -> "Energy is here! Use it your way"
-            else -> "Let's get started!"
-        }
-    } else {
-        ""
-    }
     //권한 요청 부분(나중에 코드를 다른 곳으로 빼서 권한 요청을 하면 좋을 것 같다)
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -118,22 +107,23 @@ fun ReservationScreen(
         ) {
             Spacer(modifier = Modifier.height(16.dp))
             TopSpeechBubble(
-                modifier = Modifier.padding(horizontal = 12.dp),
-                leftImageRes = R.drawable.reservation_bird_icon,
-                speechText = speechText
+                modifier = Modifier.padding(top = 52.dp),
+                selectedMood = selectedMood
             )
-            Spacer(modifier = Modifier.height(110.dp))
+            Spacer(modifier = Modifier.height(20.dp))
+            if(currentStep == 2){
+                Text(
+                    text = "Set your To-do list",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = EarlyBirdTheme.colors.fontBlack,
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(15.dp))
+            }
             Text(
-                text = if (currentStep == 1) "How are you feeling today?" else "Set your To-do list",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                color = EarlyBirdTheme.colors.fontBlack,
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = if (currentStep == 1) "Before we start,\nlet's check in with your emotions" else "What would you like to do?",
+                text = if(currentStep == 1) "Before we start,\nlet's check in with your emotions" else "What would you like to do?",
                 style = TextStyle(lineHeight = 20.sp),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
@@ -144,7 +134,6 @@ fun ReservationScreen(
             if (currentStep == 1) {
                 // 첫 번째 단계: 기분 선택
                 Spacer(modifier = Modifier.height(40.dp))
-
                 MoodSelector(
                     selectedMood = selectedMood,
                     onMoodSelected = { selectedMood = it },
@@ -171,102 +160,103 @@ fun ReservationScreen(
                 )
             }
             Spacer(modifier = Modifier.height(110.dp))
-
-            // 저장 버튼
-            Button(
-                onClick = {
-                    if (currentStep == 1) {
-                        if (selectedMood != null) {
-                            currentStep = 2
-                        }
-                    } else {
-                        // Call 기능이 활성화된 경우에만 알람 설정
-                        val alarmInfo = if (featureState.isCallEnabled) {
-                            AlarmInfo(
-                                todo = todoText,
-                                hour = featureState.selectedCallHour,
-                                minute = featureState.selectedCallMinute,
-                                amPm = featureState.selectedCallAmPm,
-                                isRepeating = isRepeating,
-                                isVibrationEnabled = isVibrationEnabled,
-                                focusDurationMinutes = if (featureState.isTimerEnabled) featureState.selectedTimerMinutes else 0
-                            )
-                        } else null
-                        
-                        // Room Database에 Todo 저장
-                        mainViewModel.addTodo(
-                            taskContent = todoText,
-                            timerDurationMinutes = if (featureState.isTimerEnabled) featureState.selectedTimerMinutes else null,
-                            reminderTime = if (featureState.isCallEnabled) {
-                                // Call 시간을 timestamp로 변환
-                                val callHour24 = when {
-                                    featureState.selectedCallAmPm == "AM" && featureState.selectedCallHour == 12 -> 0
-                                    featureState.selectedCallAmPm == "AM" -> featureState.selectedCallHour
-                                    featureState.selectedCallAmPm == "PM" && featureState.selectedCallHour == 12 -> 12
-                                    else -> featureState.selectedCallHour + 12
-                                }
-                                val currentDate = java.time.LocalDate.now()
-                                val callTime = java.time.LocalDateTime.of(
-                                    currentDate,
-                                    java.time.LocalTime.of(callHour24, featureState.selectedCallMinute)
-                                )
-                                callTime.atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
-                            } else null,
-                            hasCallReminder = featureState.isCallEnabled,
-                            isRepeating = isRepeating,
-                            hasVibration = isVibrationEnabled,
-                            scheduledDate = System.currentTimeMillis()
-                        )
-                        
-                        // 알람 설정 (Call 기능이 활성화된 경우에만)
-                        if (alarmInfo != null) {
-                            onSaveAlarm(alarmInfo)
-                            val (hoursLeft, minutesLeft) = calculateRemainingTime(
-                                featureState.selectedCallHour,
-                                featureState.selectedCallMinute,
-                                featureState.selectedCallAmPm
-                            )
-                            AlarmScheduler.scheduleAlarm(
-                                context = context,
-                                alarmType = AlarmType.USER,
-                                alarmInfo = alarmInfo,
-                            )
-                            val message = "${hoursLeft}시간 ${minutesLeft}분 후에\n같이 시작해보자!"
-                            //알람 저장 확인
-                            Log.d("reservation", alarmInfo.toString())
-                            checkPermission(
-                                context = context,
-                                content = message,
-                                buttonContent = "좋아!",
-                                durationMillis = if (featureState.isTimerEnabled) featureState.selectedTimerMinutes else 0,
-                                isFinished = true
-                            )
+            if(selectedMood != null){
+                Button(
+                    onClick = {
+                        if (currentStep == 1) {
+                            if (selectedMood != null) {
+                                currentStep = 2
+                            }
                         } else {
-                            //Call 기능이 없는 경우 바로 완료 처리
-                            onBackClick() // 메인 화면으로 돌아가기
-                        }
-                    }
-                },
-                modifier = Modifier
-                    .width(216.dp)
-                    .height(40.dp)
-                    .align(Alignment.CenterHorizontally),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = EarlyBirdTheme.colors.mainBlue,
-                    contentColor = EarlyBirdTheme.colors.white
-                ),
-                elevation = ButtonDefaults.buttonElevation(
-                    defaultElevation = 3.dp
-                )
+                            // Call 기능이 활성화된 경우에만 알람 설정
+                            val alarmInfo = if (featureState.isCallEnabled) {
+                                AlarmInfo(
+                                    todo = todoText,
+                                    hour = featureState.selectedCallHour,
+                                    minute = featureState.selectedCallMinute,
+                                    amPm = featureState.selectedCallAmPm,
+                                    isRepeating = isRepeating,
+                                    isVibrationEnabled = isVibrationEnabled,
+                                    focusDurationMinutes = if (featureState.isTimerEnabled) featureState.selectedTimerMinutes else 0
+                                )
+                            } else null
 
-            ) {
-                Text(
-                    text = if (currentStep == 1) "Continue" else "Done",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.align(Alignment.CenterVertically)
-                )
+                            // Room Database에 Todo 저장
+                            mainViewModel.addTodo(
+                                taskContent = todoText,
+                                timerDurationMinutes = if (featureState.isTimerEnabled) featureState.selectedTimerMinutes else null,
+                                reminderTime = if (featureState.isCallEnabled) {
+                                    // Call 시간을 timestamp로 변환
+                                    val callHour24 = when {
+                                        featureState.selectedCallAmPm == "AM" && featureState.selectedCallHour == 12 -> 0
+                                        featureState.selectedCallAmPm == "AM" -> featureState.selectedCallHour
+                                        featureState.selectedCallAmPm == "PM" && featureState.selectedCallHour == 12 -> 12
+                                        else -> featureState.selectedCallHour + 12
+                                    }
+                                    val currentDate = java.time.LocalDate.now()
+                                    val callTime = java.time.LocalDateTime.of(
+                                        currentDate,
+                                        java.time.LocalTime.of(callHour24, featureState.selectedCallMinute)
+                                    )
+                                    callTime.atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+                                } else null,
+                                hasCallReminder = featureState.isCallEnabled,
+                                isRepeating = isRepeating,
+                                hasVibration = isVibrationEnabled,
+                                scheduledDate = System.currentTimeMillis()
+                            )
+
+                            // 알람 설정 (Call 기능이 활성화된 경우에만)
+                            if (alarmInfo != null) {
+                                onSaveAlarm(alarmInfo)
+                                val (hoursLeft, minutesLeft) = calculateRemainingTime(
+                                    featureState.selectedCallHour,
+                                    featureState.selectedCallMinute,
+                                    featureState.selectedCallAmPm
+                                )
+                                AlarmScheduler.scheduleAlarm(
+                                    context = context,
+                                    alarmType = AlarmType.USER,
+                                    alarmInfo = alarmInfo,
+                                )
+                                val message = "${hoursLeft}시간 ${minutesLeft}분 후에\n같이 시작해보자!"
+                                //알람 저장 확인
+                                Log.d("reservation", alarmInfo.toString())
+                                checkPermission(
+                                    context = context,
+                                    content = message,
+                                    buttonContent = "좋아!",
+                                    durationMillis = if (featureState.isTimerEnabled) featureState.selectedTimerMinutes else 0,
+                                    isFinished = true
+                                )
+                            } else {
+                                //Call 기능이 없는 경우 바로 완료 처리
+                                onBackClick() // 메인 화면으로 돌아가기
+                            }
+                        }
+                    },
+                    modifier = Modifier
+                        .width(216.dp)
+                        .height(40.dp)
+                        .align(Alignment.CenterHorizontally),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = EarlyBirdTheme.colors.mainBlue,
+                        contentColor = EarlyBirdTheme.colors.white
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(
+                        defaultElevation = 3.dp
+                    )
+                ) {
+                    Text(
+                        text = if (currentStep == 1) "Continue" else "Done",
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    )
+                }
             }
+            // 저장 버튼
+
             // 하단 여백 추가 (메뉴바와 겹치지 않도록)
             Spacer(modifier = Modifier.height(80.dp))
         }

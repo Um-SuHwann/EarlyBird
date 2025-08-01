@@ -71,7 +71,7 @@ fun NextCallReminderComponent(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.reservation_bird_icon), // TODO: 전화 아이콘으로 변경
+                    painter = painterResource(id = R.drawable.reservation_bird_basic), // TODO: 전화 아이콘으로 변경
                     contentDescription = "Next call",
                     tint = EarlyBirdTheme.colors.mainBlue,
                     modifier = Modifier.size(20.dp)

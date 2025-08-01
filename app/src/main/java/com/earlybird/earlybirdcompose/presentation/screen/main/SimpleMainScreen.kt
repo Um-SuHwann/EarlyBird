@@ -74,7 +74,7 @@ fun SimpleMainScreen(
             contentDescription = "Bird shadow",
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .padding(top = 140.dp)
+                .padding(top = 150.dp)
                 .width(350.dp)
         )
         

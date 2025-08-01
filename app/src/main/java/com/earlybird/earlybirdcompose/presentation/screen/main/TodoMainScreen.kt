@@ -33,6 +33,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.earlybird.earlybirdcompose.R
 import com.earlybird.earlybirdcompose.presentation.screen.main.component.BirdImageComponent
 import com.earlybird.earlybirdcompose.presentation.screen.main.component.DateComponent
+import com.earlybird.earlybirdcompose.presentation.screen.main.component.ModeToggleComponent
 import com.earlybird.earlybirdcompose.presentation.screen.main.component.SpeechBubbleComponent
 import com.earlybird.earlybirdcompose.presentation.screen.main.component.TodoListComponent
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdComposeTheme
@@ -40,9 +41,7 @@ import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdTheme
 
 @Composable
 fun MainScreen(
-//    onSelectTimeClick: () -> Unit = {},
-//    onStartNowClick: () -> Unit = {},
-    onSettingClick: () -> Unit = {},
+    onModeToggle: () -> Unit = {},
     onAddTodoClick: () -> Unit = {},
     viewModel: MainViewModel = hiltViewModel()
 ) {
@@ -55,28 +54,21 @@ fun MainScreen(
             .background(backgroundColor)
             .padding(WindowInsets.systemBars.asPaddingValues())
     ) {
-        // 설정 버튼 (오른쪽 상단)
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp, end = 20.dp),
-            horizontalArrangement = Arrangement.End
-        ) {
-            IconButton(onClick = onSettingClick) {
-                Icon(
-                    painter = painterResource(id = R.drawable.setting_icon),
-                    contentDescription = "설정",
-                    modifier = Modifier.size(24.dp),
-                    tint = Color.Unspecified
-                )
-            }
-        }
-        // 현재 날짜 (왼쪽 위)
+        // 왼쪽 상단 - DateComponent
         DateComponent(
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .padding(start = 20.dp, top = 20.dp),
             dayStreak = 5
+        )
+
+        // 오른쪽 상단 - Mode Toggle
+        ModeToggleComponent(
+            isSimpleMode = false,
+            onToggle = onModeToggle,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(end = 20.dp, top = 20.dp)
         )
         Column(
             modifier = Modifier

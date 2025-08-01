@@ -38,49 +38,49 @@ fun FeatureSelector(
         modifier = modifier.padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Timer 기능
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Need focus timer",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Medium,
-                color = EarlyBirdTheme.colors.fontBlack
-            )
-            Switch(
-                checked = featureState.isTimerEnabled,
-                onCheckedChange = { 
-                    onFeatureChange(featureState.copy(isTimerEnabled = it))
-                },
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = EarlyBirdTheme.colors.white,
-                    checkedTrackColor = EarlyBirdTheme.colors.mainBlue,
-                    uncheckedThumbColor = EarlyBirdTheme.colors.white,
-                    uncheckedTrackColor = Color(0xFF838383)
-                )
-            )
-        }
+//        // Timer 기능
+//        Row(
+//            modifier = Modifier.fillMaxWidth(),
+//            horizontalArrangement = Arrangement.SpaceBetween,
+//            verticalAlignment = Alignment.CenterVertically
+//        ) {
+//            Text(
+//                text = "Need focus timer",
+//                fontSize = 18.sp,
+//                fontWeight = FontWeight.Medium,
+//                color = EarlyBirdTheme.colors.fontBlack
+//            )
+//            Switch(
+//                checked = featureState.isTimerEnabled,
+//                onCheckedChange = {
+//                    onFeatureChange(featureState.copy(isTimerEnabled = it))
+//                },
+//                colors = SwitchDefaults.colors(
+//                    checkedThumbColor = EarlyBirdTheme.colors.white,
+//                    checkedTrackColor = EarlyBirdTheme.colors.mainBlue,
+//                    uncheckedThumbColor = EarlyBirdTheme.colors.white,
+//                    uncheckedTrackColor = Color(0xFF838383)
+//                )
+//            )
+//        }
         
-        // Timer 시간 선택 (Timer가 켜져 있을 때만 표시)
-        if (featureState.isTimerEnabled) {
-            TimerDurationSelector(
-                selectedMinutes = featureState.selectedTimerMinutes,
-                onMinutesSelected = { minutes ->
-                    onFeatureChange(featureState.copy(selectedTimerMinutes = minutes))
-                }
-            )
-        }
+//        // Timer 시간 선택 (Timer가 켜져 있을 때만 표시)
+//        if (featureState.isTimerEnabled) {
+//            TimerDurationSelector(
+//                selectedMinutes = featureState.selectedTimerMinutes,
+//                onMinutesSelected = { minutes ->
+//                    onFeatureChange(featureState.copy(selectedTimerMinutes = minutes))
+//                }
+//            )
+//        }
         
-        //중간선
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()           
-                .height(1.dp)               
-                .background(Color(0xFFC9C9C9))    
-        )
+//        //중간선
+//        Box(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .height(1.dp)
+//                .background(Color(0xFFC9C9C9))
+//        )
         // Call 기능
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -125,49 +125,49 @@ fun FeatureSelector(
     }
 }
 
-@Composable
-fun TimerDurationSelector(
-    selectedMinutes: Int,
-    onMinutesSelected: (Int) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val durations = listOf(2, 5, 10)
-    
-    Row(
-        modifier = modifier
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(18.dp, Alignment.CenterHorizontally),
-    ) {
-        durations.forEach { duration ->
-            val isSelected = selectedMinutes == duration
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(4.dp))
-                    .width(80.dp).height(30.dp)
-                    .background(
-                        if (isSelected) EarlyBirdTheme.colors.mainBlue
-                        else EarlyBirdTheme.colors.white
-                    )
-                    .border(
-                        1.dp,
-                        if (isSelected) EarlyBirdTheme.colors.mainBlue
-                        else Color(0xFFC1C1C1),
-                        RoundedCornerShape(4.dp)
-                    )
-                    .clickable { onMinutesSelected(duration) },
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "${duration}min",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = if (isSelected) EarlyBirdTheme.colors.white
-                           else EarlyBirdTheme.colors.fontBlack
-                )
-            }
-        }
-    }
-}
+//@Composable
+//fun TimerDurationSelector(
+//    selectedMinutes: Int,
+//    onMinutesSelected: (Int) -> Unit,
+//    modifier: Modifier = Modifier
+//) {
+//    val durations = listOf(2, 5, 10)
+//
+//    Row(
+//        modifier = modifier
+//            .fillMaxWidth(),
+//        horizontalArrangement = Arrangement.spacedBy(18.dp, Alignment.CenterHorizontally),
+//    ) {
+//        durations.forEach { duration ->
+//            val isSelected = selectedMinutes == duration
+//            Box(
+//                modifier = Modifier
+//                    .clip(RoundedCornerShape(4.dp))
+//                    .width(80.dp).height(30.dp)
+//                    .background(
+//                        if (isSelected) EarlyBirdTheme.colors.mainBlue
+//                        else EarlyBirdTheme.colors.white
+//                    )
+//                    .border(
+//                        1.dp,
+//                        if (isSelected) EarlyBirdTheme.colors.mainBlue
+//                        else Color(0xFFC1C1C1),
+//                        RoundedCornerShape(4.dp)
+//                    )
+//                    .clickable { onMinutesSelected(duration) },
+//                contentAlignment = Alignment.Center
+//            ) {
+//                Text(
+//                    text = "${duration}min",
+//                    fontSize = 12.sp,
+//                    fontWeight = FontWeight.Bold,
+//                    color = if (isSelected) EarlyBirdTheme.colors.white
+//                           else EarlyBirdTheme.colors.fontBlack
+//                )
+//            }
+//        }
+//    }
+//}
 
 @Composable
 fun CallTimeSelector(
@@ -226,7 +226,7 @@ fun CallTimeSelector(
 fun FeatureSelectorPreview() {
     FeatureSelector(
         featureState = FeatureState(
-            isTimerEnabled = true, 
+            isTimerEnabled = false,
             isCallEnabled = true,
             selectedTimerMinutes = 25,
             selectedCallHour = 8,

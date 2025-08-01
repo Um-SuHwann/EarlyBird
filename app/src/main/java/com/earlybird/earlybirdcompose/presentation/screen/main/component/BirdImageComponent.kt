@@ -33,7 +33,7 @@ fun BirdImageComponent(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .width(150.dp)
-                .offset(y = 10.dp)
+                .offset(y = 20.dp)
         )
         
         // 새 이미지 (위쪽)
