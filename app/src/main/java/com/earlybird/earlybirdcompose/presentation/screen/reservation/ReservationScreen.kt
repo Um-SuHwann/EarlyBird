@@ -72,7 +72,6 @@ fun ReservationScreen(
     //컴포넌트 재사용을 위한 스텝 (1: 기분 선택, 2: 할일 입력 및 기능 선택)
     var currentStep by remember { mutableStateOf(1) }
 
-
     val context = LocalContext.current
 
     //새가 말하는 말풍선 내용

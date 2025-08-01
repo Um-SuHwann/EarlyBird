@@ -5,6 +5,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.earlybird.earlybirdcompose.presentation.screen.main.MainScreen
+import com.earlybird.earlybirdcompose.presentation.screen.main.SimpleMainScreen
 
 fun NavGraphBuilder.mainGraph(
     navController: NavController,
@@ -14,6 +15,16 @@ fun NavGraphBuilder.mainGraph(
         MainScreen(
             onAddTodoClick = {
                 navController.navigate("reservation")
+            }
+        )
+    }
+    composable("simple_main"){
+        SimpleMainScreen(
+            onStartTimer = {
+
+            },
+            onGoToTodoMain = {
+                navController.navigate("main")
             }
         )
     }

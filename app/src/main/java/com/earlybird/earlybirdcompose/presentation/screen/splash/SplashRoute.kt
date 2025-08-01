@@ -15,7 +15,7 @@ fun SplashRoute(
 ) {
     LaunchedEffect(Unit) {
         delay(2000)
-        navController.navigate("main") {
+        navController.navigate("simple_main") {
             popUpTo("splash") { inclusive = true }
         }
     }
