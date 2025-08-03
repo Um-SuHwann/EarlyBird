@@ -20,6 +20,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DividerDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -52,6 +54,11 @@ fun TodoListComponent(
     onStartClick: (TodoItem) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // 전화 예약 todo와 일반 todo 분리
+    val callTodos = todoItems.filter { it.hasCall && it.reservedTime != null }
+        .sortedBy { it.reservedTime } // 시간 순서대로 정렬
+    val regularTodos = todoItems.filter { !it.hasCall || it.reservedTime == null }
+    
     Surface(
         modifier = modifier
             .fillMaxSize()
@@ -65,22 +72,37 @@ fun TodoListComponent(
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 32.dp)
         ) {
-//            Text(
-//                text = "Today's Tasks",
-//                fontSize = 18.sp,
-//                fontWeight = FontWeight.Bold,
-//                color = EarlyBirdTheme.colors.fontBlack,
-//                modifier = Modifier.padding(bottom = 12.dp)
-//            )
-            
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(28.dp)
             ) {
-                items(todoItems) { todoItem ->
-                    TodoItemRow(
-                        todoItem = todoItem,
-                        onStartClick = { onStartClick(todoItem) }
-                    )
+                // 전화 예약 todo 섹션
+                if (callTodos.isNotEmpty()) {
+
+                    items(callTodos) { todoItem ->
+                        TodoItemRow(
+                            todoItem = todoItem,
+                            onStartClick = { onStartClick(todoItem) }
+                        )
+                    }
+                    
+                    // 구분선
+                    if (regularTodos.isNotEmpty()) {
+                        item {
+                            HorizontalDivider(
+                                modifier = Modifier,
+                                thickness = 1.dp,
+                                color = Color(0xFFC5C5C5))
+                        }
+                    }
+                }
+                // 일반 todo 섹션
+                if (regularTodos.isNotEmpty()) {
+                    items(regularTodos) { todoItem ->
+                        TodoItemRow(
+                            todoItem = todoItem,
+                            onStartClick = { onStartClick(todoItem) }
+                        )
+                    }
                 }
             }
         }
@@ -190,13 +212,16 @@ fun TodoListComponentPreview() {
     EarlyBirdComposeTheme {
         TodoListComponent(
             todoItems = listOf(
-                TodoItem(1, "Complete morning routine", reservedTime = "07:00 AM"),
-                TodoItem(2, "Read for 30 minutes", timerDuration = "30 min", hasTimer = true),
-                TodoItem(3, "Exercise for 20 minutes", reservedTime = "08:00 AM", timerDuration = "20 min", hasTimer = true),
-                TodoItem(4, "Call mom", hasCall = true),
-                TodoItem(5, "Plan tomorrow's schedule", timerDuration = "15 min", hasTimer = true, hasCall = true),
+                // 전화 예약 todo (시간 순서대로 표시됨)
+                TodoItem(1, "Call doctor", reservedTime = "09:00 AM", hasCall = true),
+                TodoItem(2, "Call mom", reservedTime = "02:00 PM", hasCall = true),
+                TodoItem(3, "Meeting with client", reservedTime = "04:30 PM", hasCall = true),
+                
+                // 일반 todo
+                TodoItem(4, "Read for 30 minutes", timerDuration = "30 min", hasTimer = true),
+                TodoItem(5, "Exercise for 20 minutes", timerDuration = "20 min", hasTimer = true),
                 TodoItem(6, "Write journal entry"),
-                TodoItem(7, "Grocery shopping", reservedTime = "02:00 PM")
+                TodoItem(7, "Grocery shopping")
             ),
             onStartClick = { /* Handle start click */ }
         )
