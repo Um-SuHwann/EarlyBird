@@ -49,7 +49,6 @@ import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.
 import com.earlybird.earlybirdcompose.presentation.screen.main.MainViewModel
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdComposeTheme
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdTheme
-import com.earlybird.earlybirdcompose.util.checkPermission
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
@@ -58,6 +57,7 @@ import java.time.temporal.ChronoUnit
 fun ReservationScreen(
     onBackClick: () -> Unit = {},
     onSaveAlarm: (AlarmInfo) -> Unit = {},
+    onNavigateToTimer: (String, String, Int) -> Unit = { _, _, _ -> },
     mainViewModel: MainViewModel = hiltViewModel()
 ) {
     //할일 입력 및 알람 설정 정보들
@@ -168,71 +168,17 @@ fun ReservationScreen(
                                 currentStep = 2
                             }
                         } else {
-                            // Call 기능이 활성화된 경우에만 알람 설정
-                            val alarmInfo = if (featureState.isCallEnabled) {
-                                AlarmInfo(
-                                    todo = todoText,
-                                    hour = featureState.selectedCallHour,
-                                    minute = featureState.selectedCallMinute,
-                                    amPm = featureState.selectedCallAmPm,
-                                    isRepeating = isRepeating,
-                                    isVibrationEnabled = isVibrationEnabled,
-                                    focusDurationMinutes = if (featureState.isTimerEnabled) featureState.selectedTimerMinutes else 0
-                                )
-                            } else null
-
-                            // Room Database에 Todo 저장
-                            mainViewModel.addTodo(
-                                taskContent = todoText,
-                                timerDurationMinutes = if (featureState.isTimerEnabled) featureState.selectedTimerMinutes else null,
-                                reminderTime = if (featureState.isCallEnabled) {
-                                    // Call 시간을 timestamp로 변환
-                                    val callHour24 = when {
-                                        featureState.selectedCallAmPm == "AM" && featureState.selectedCallHour == 12 -> 0
-                                        featureState.selectedCallAmPm == "AM" -> featureState.selectedCallHour
-                                        featureState.selectedCallAmPm == "PM" && featureState.selectedCallHour == 12 -> 12
-                                        else -> featureState.selectedCallHour + 12
-                                    }
-                                    val currentDate = java.time.LocalDate.now()
-                                    val callTime = java.time.LocalDateTime.of(
-                                        currentDate,
-                                        java.time.LocalTime.of(callHour24, featureState.selectedCallMinute)
-                                    )
-                                    callTime.atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
-                                } else null,
-                                hasCallReminder = featureState.isCallEnabled,
+                            saveTodoAndAlarm(
+                                todoText = todoText,
+                                featureState = featureState,
                                 isRepeating = isRepeating,
-                                hasVibration = isVibrationEnabled,
-                                scheduledDate = System.currentTimeMillis()
+                                isVibrationEnabled = isVibrationEnabled,
+                                mainViewModel = mainViewModel,
+                                context = context,
+                                onSaveAlarm = onSaveAlarm,
+                                onBackClick = onBackClick,
+                                onNavigateToTimer = onNavigateToTimer
                             )
-
-                            // 알람 설정 (Call 기능이 활성화된 경우에만)
-                            if (alarmInfo != null) {
-                                onSaveAlarm(alarmInfo)
-                                val (hoursLeft, minutesLeft) = calculateRemainingTime(
-                                    featureState.selectedCallHour,
-                                    featureState.selectedCallMinute,
-                                    featureState.selectedCallAmPm
-                                )
-                                AlarmScheduler.scheduleAlarm(
-                                    context = context,
-                                    alarmType = AlarmType.USER,
-                                    alarmInfo = alarmInfo,
-                                )
-                                val message = "${hoursLeft}시간 ${minutesLeft}분 후에\n같이 시작해보자!"
-                                //알람 저장 확인
-                                Log.d("reservation", alarmInfo.toString())
-                                checkPermission(
-                                    context = context,
-                                    content = message,
-                                    buttonContent = "좋아!",
-                                    durationMillis = if (featureState.isTimerEnabled) featureState.selectedTimerMinutes else 0,
-                                    isFinished = true
-                                )
-                            } else {
-                                //Call 기능이 없는 경우 바로 완료 처리
-                                onBackClick() // 메인 화면으로 돌아가기
-                            }
                         }
                     },
                     modifier = Modifier
@@ -255,13 +201,87 @@ fun ReservationScreen(
                     )
                 }
             }
-            // 저장 버튼
-
             // 하단 여백 추가 (메뉴바와 겹치지 않도록)
             Spacer(modifier = Modifier.height(80.dp))
         }
     }
 }
+
+private fun saveTodoAndAlarm(
+    todoText: String,
+    featureState: FeatureState,
+    isRepeating: Boolean,
+    isVibrationEnabled: Boolean,
+    mainViewModel: MainViewModel,
+    context: android.content.Context,
+    onSaveAlarm: (AlarmInfo) -> Unit,
+    onBackClick: () -> Unit,
+    onNavigateToTimer: (String, String, Int) -> Unit
+) {
+    // Call 기능이 활성화된 경우에만 알람 설정
+    val alarmInfo = if (featureState.isCallEnabled) {
+        AlarmInfo(
+            todo = todoText,
+            hour = featureState.selectedCallHour,
+            minute = featureState.selectedCallMinute,
+            amPm = featureState.selectedCallAmPm,
+            isRepeating = isRepeating,
+            isVibrationEnabled = isVibrationEnabled,
+            focusDurationMinutes = if (featureState.isTimerEnabled) featureState.selectedTimerMinutes else 0
+        )
+    } else null
+
+    // Room Database에 Todo 저장
+    mainViewModel.addTodo(
+        taskContent = todoText,
+        timerDurationMinutes = if (featureState.isTimerEnabled) featureState.selectedTimerMinutes else null,
+        reminderTime = if (featureState.isCallEnabled) {
+            // Call 시간을 timestamp로 변환
+            val callHour24 = when {
+                featureState.selectedCallAmPm == "AM" && featureState.selectedCallHour == 12 -> 0
+                featureState.selectedCallAmPm == "AM" -> featureState.selectedCallHour
+                featureState.selectedCallAmPm == "PM" && featureState.selectedCallHour == 12 -> 12
+                else -> featureState.selectedCallHour + 12
+            }
+            val currentDate = java.time.LocalDate.now()
+            val callTime = java.time.LocalDateTime.of(
+                currentDate,
+                java.time.LocalTime.of(callHour24, featureState.selectedCallMinute)
+            )
+            callTime.atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+        } else null,
+        hasCallReminder = featureState.isCallEnabled,
+        isRepeating = isRepeating,
+        hasVibration = isVibrationEnabled,
+        scheduledDate = System.currentTimeMillis()
+    )
+
+    // 알람 설정 (Call 기능이 활성화된 경우에만)
+    if (alarmInfo != null) {
+        onSaveAlarm(alarmInfo)
+        val (hoursLeft, minutesLeft) = calculateRemainingTime(
+            featureState.selectedCallHour,
+            featureState.selectedCallMinute,
+            featureState.selectedCallAmPm
+        )
+        AlarmScheduler.scheduleAlarm(
+            context = context,
+            alarmType = AlarmType.USER,
+            alarmInfo = alarmInfo,
+        )
+        val message = "I will remind you\nafter ${hoursLeft} : ${minutesLeft} later"
+        //알람을 실제로 저장하는 곳
+        onNavigateToTimer(
+            message,
+            "Okay!",
+            0
+        )
+    } else {
+        //Call 기능이 없는 경우 바로 완료 처리
+        onBackClick() // 메인 화면으로 돌아가기
+    }
+}
+
 fun calculateRemainingTime(hour: Int, minute: Int, amPm: String): Pair<Int, Int> {
     // 12시간 → 24시간 변환
     val hour24 = when {

@@ -1,15 +1,18 @@
 package com.earlybird.earlybirdcompose.presentation.screen.timer
 
-import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -36,6 +39,7 @@ fun TimerScreen(
     buttonContent: String,
     durationMillis: Int,
     isFinished: Boolean = false,
+    showMoodCheck: Boolean = true,
     onTimerDoneClick: () -> Unit = {},
     onMoodSelected: (Int) -> Unit = {}
 ){
@@ -65,24 +69,25 @@ fun TimerScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(brush = backgroundColor)
+//            .padding(WindowInsets.systemBars.only(WindowInsetsSides.Top).asPaddingValues())
     ){
         SlideInImage(progress = progress.value)
-        Column(
+
+        CircleTimer(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 18.dp, start = 26.dp, end = 26.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            CircleTimer(
-                content = content,
-                buttonContent = buttonContent,
-                progress = progress.value,
-                durationMillis = durationMillis,
-                onTimerDoneClick = {
+                .padding(horizontal = 24.dp).padding(top = 18.dp),
+            content = content,
+            buttonContent = buttonContent,
+            progress = progress.value,
+            durationMillis = durationMillis,
+            onTimerDoneClick = {
+                if (showMoodCheck) {
                     showMoodModal = true
+                } else {
+                    onTimerDoneClick()
                 }
-            )
-        }
+            }
+        )
         
         // 기분 상태 모달
         MoodModal(
@@ -105,12 +110,15 @@ fun CircleTimer(
     buttonContent: String,
     progress: Float,
     durationMillis: Int, // 2분
-    onTimerDoneClick: () -> Unit
+    onTimerDoneClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val color = if (progress < 0.5f) Color(0xFF4DA6FF) else Color(0xFFFF6666)
     val isFinished = progress >= 1f
 
-    TimerContainer {
+    TimerContainer(
+        modifier = modifier
+    ) {
         if (!isFinished) {
             TimerContent(progress, durationMillis, color)
         } else {
@@ -132,7 +140,8 @@ fun TimerScreenPreview(){
                 content = "",
                 buttonContent = "",
                 durationMillis = 2 * 60 * 1000,
-                isFinished= false,
+                isFinished = false,
+                showMoodCheck = true,
                 onTimerDoneClick = {}
             )
         }
