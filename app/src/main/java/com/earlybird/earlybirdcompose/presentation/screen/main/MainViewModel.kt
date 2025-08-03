@@ -87,8 +87,8 @@ private fun TodoEntity.toTodoItem(): TodoItem {
         id = this.id,
         text = this.taskContent,
         reservedTime = this.reminderTime?.let { 
-            // Convert timestamp to readable time format
-            java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
+            // Convert timestamp to 12-hour format with AM/PM in English
+            java.text.SimpleDateFormat("hh:mm a", java.util.Locale.ENGLISH)
                 .format(java.util.Date(it))
         },
         timerDuration = this.timerDurationMinutes?.let { "${it}min" },

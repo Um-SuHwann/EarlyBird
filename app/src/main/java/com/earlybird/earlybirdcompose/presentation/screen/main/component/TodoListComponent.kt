@@ -1,6 +1,7 @@
 package com.earlybird.earlybirdcompose.presentation.screen.main.component
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -9,12 +10,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -48,6 +51,40 @@ data class TodoItem(
     val hasCall: Boolean = false // 전화 기능 여부
 )
 
+// 시간을 24시간 형식의 분 단위로 변환하는 함수
+private fun parseTimeToMinutes(timeString: String): Int {
+    if (timeString.isBlank()) return 0
+    
+    try {
+        // "09:00 AM" 또는 "2:30 PM" 형식 파싱
+        val parts = timeString.trim().split(" ")
+        if (parts.size != 2) return 0
+        
+        val timePart = parts[0] // "09:00"
+        val amPm = parts[1].uppercase() // "AM" 또는 "PM"
+        
+        val timeParts = timePart.split(":")
+        if (timeParts.size != 2) return 0
+        
+        val hour = timeParts[0].toIntOrNull() ?: return 0
+        val minute = timeParts[1].toIntOrNull() ?: return 0
+        
+        // 24시간 형식으로 변환
+        val hour24 = when {
+            amPm == "AM" && hour == 12 -> 0 // 12:00 AM = 00:00
+            amPm == "AM" -> hour // 1:00 AM ~ 11:59 AM
+            amPm == "PM" && hour == 12 -> 12 // 12:00 PM = 12:00
+            amPm == "PM" -> hour + 12 // 1:00 PM ~ 11:59 PM = 13:00 ~ 23:59
+            else -> hour
+        }
+        
+        // 분 단위로 변환 (00:00 = 0분, 23:59 = 1439분)
+        return hour24 * 60 + minute
+    } catch (e: Exception) {
+        return 0
+    }
+}
+
 @Composable
 fun TodoListComponent(
     todoItems: List<TodoItem>,
@@ -56,7 +93,7 @@ fun TodoListComponent(
 ) {
     // 전화 예약 todo와 일반 todo 분리
     val callTodos = todoItems.filter { it.hasCall && it.reservedTime != null }
-        .sortedBy { it.reservedTime } // 시간 순서대로 정렬
+        .sortedBy { parseTimeToMinutes(it.reservedTime ?: "") } // 시간을 분 단위로 변환해서 정렬
     val regularTodos = todoItems.filter { !it.hasCall || it.reservedTime == null }
     
     Surface(
@@ -78,10 +115,12 @@ fun TodoListComponent(
                 // 전화 예약 todo 섹션
                 if (callTodos.isNotEmpty()) {
 
-                    items(callTodos) { todoItem ->
-                        TodoItemRow(
-                            todoItem = todoItem,
-                            onStartClick = { onStartClick(todoItem) }
+                    items(callTodos.size) { index ->
+                        TimelineTodoItemRow(
+                            todoItem = callTodos[index],
+                            isFirst = index == 0,
+                            isLast = index == callTodos.size - 1,
+                            onStartClick = { onStartClick(callTodos[index]) }
                         )
                     }
                     
@@ -98,7 +137,7 @@ fun TodoListComponent(
                 // 일반 todo 섹션
                 if (regularTodos.isNotEmpty()) {
                     items(regularTodos) { todoItem ->
-                        TodoItemRow(
+                        RegularTodoItemRow(
                             todoItem = todoItem,
                             onStartClick = { onStartClick(todoItem) }
                         )
@@ -109,99 +148,180 @@ fun TodoListComponent(
     }
 }
 
+// 타임라인 형식의 전화 예약 todo 아이템
 @Composable
-private fun TodoItemRow(
+private fun TimelineTodoItemRow(
     todoItem: TodoItem,
+    isFirst: Boolean,
+    isLast: Boolean,
     onStartClick: () -> Unit
 ) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = EarlyBirdTheme.colors.white,
-        shape = RoundedCornerShape(8.dp),
-        border = BorderStroke((1.5).dp,Color(0xFFD2D2D2))
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(80.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
+        // 시간 표시 (왼쪽)
+        Text(
+            text = todoItem.reservedTime ?: "",
+            fontSize = 12.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = EarlyBirdTheme.colors.fontBlack
+        )
+
+        // 타임라인 선과 점
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .width(24.dp)
+                .fillMaxHeight(),
+            contentAlignment = Alignment.Center
         ) {
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = todoItem.text,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF0E0E0E)
-                )
-                // 예약 시간, 타이머 시간, 아이콘들을 표시하는 Row
-                if (todoItem.reservedTime != null || todoItem.timerDuration != null || todoItem.hasTimer || todoItem.hasCall) {
-                    Row(
-                        modifier = Modifier,
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        // 예약 시간 표시
-                        todoItem.reservedTime?.let { time ->
-                            Text(
-                                text = time,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = EarlyBirdTheme.colors.fontBlack
-                            )
-                        }
-                        
-                        // 타이머 시간 표시
-                        todoItem.timerDuration?.let { duration ->
-                            Text(
-                                text = duration,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = EarlyBirdTheme.colors.fontBlack
-                            )
-                        }
-                        
-                        // 타이머 아이콘
-                        if (todoItem.hasTimer) {
-                            Image(
-                                painter = painterResource(id = R.drawable.main_timer_icon), // 임시 아이콘, 나중에 타이머 아이콘으로 변경
-                                contentDescription = "Timer",
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
-                        
-                        // 전화 아이콘
-                        if (todoItem.hasCall) {
-                            Image(
-                                painter = painterResource(id = R.drawable.main_phone_icon), // 임시 아이콘, 나중에 전화 아이콘으로 변경
-                                contentDescription = "Call",
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
+            // 세로 연결선
+            if (!isFirst || !isLast) {
+                Canvas(
+                    modifier = Modifier
+                        .width(2.dp)
+                        .fillMaxHeight()
+                ) {
+                    val strokeWidth = 4f
+                    val color = Color(0xFFE0E0E0)
+
+                    if (!isFirst) {
+                        // 위쪽 선
+                        drawLine(
+                            color = color,
+                            start = androidx.compose.ui.geometry.Offset(size.width / 2, 0f),
+                            end = androidx.compose.ui.geometry.Offset(size.width / 2, size.height / 2),
+                            strokeWidth = strokeWidth
+                        )
+                    }
+
+                    if (!isLast) {
+                        // 아래쪽 선
+                        drawLine(
+                            color = color,
+                            start = androidx.compose.ui.geometry.Offset(size.width / 2, size.height / 2),
+                            end = androidx.compose.ui.geometry.Offset(size.width / 2, size.height),
+                            strokeWidth = strokeWidth
+                        )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Button(
-                onClick = onStartClick,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = EarlyBirdTheme.colors.mainBlue,
-                    contentColor = EarlyBirdTheme.colors.white,
-                ),
-                shape = RoundedCornerShape(8.dp),
-                contentPadding = PaddingValues(0.dp),
+            // 중앙 점
+            Box(
                 modifier = Modifier
-                    .size(56.dp)) {
-                Text(
-                    text = "Start",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
+                    .size(12.dp)
+                    .background(
+                        color = EarlyBirdTheme.colors.mainBlue,
+                        shape = CircleShape
+                    )
+            )
+        }
+        Text(
+            modifier = Modifier
+                .weight(1f),
+            text = todoItem.text,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF0E0E0E)
+        )
+        // Start 버튼 (오른쪽)
+        Button(
+            onClick = onStartClick,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF1799BE),
+                contentColor = EarlyBirdTheme.colors.white,
+            ),
+            shape = RoundedCornerShape(28.dp),
+            contentPadding = PaddingValues(0.dp),
+            modifier = Modifier
+                .width(57.dp)
+                .height(48.dp)
+        ) {
+            Text(
+                text = "Start",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+    }
+}
+
+// 일반 todo 아이템 (기존 형태 유지)
+@Composable
+private fun RegularTodoItemRow(
+    todoItem: TodoItem,
+    onStartClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // 할일 내용 (왼쪽에서 시작)
+        Text(
+            modifier = Modifier.weight(1f),
+            text = todoItem.text,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF0E0E0E)
+        )
+//        Column(
+//            modifier = Modifier.weight(1f)
+//        ) {
+//            Text(
+//                text = todoItem.text,
+//                fontSize = 16.sp,
+//                fontWeight = FontWeight.Bold,
+//                color = Color(0xFF0E0E0E)
+//            )
+//
+//            // 타이머나 기타 정보 표시
+//            Row(
+//                verticalAlignment = Alignment.CenterVertically,
+//                horizontalArrangement = Arrangement.spacedBy(8.dp)
+//            ) {
+//                todoItem.timerDuration?.let { duration ->
+//                    Text(
+//                        text = duration,
+//                        fontSize = 12.sp,
+//                        fontWeight = FontWeight.Medium,
+//                        color = Color(0xFF666666)
+//                    )
+//                }
+//
+//                if (todoItem.hasTimer) {
+//                    Image(
+//                        painter = painterResource(id = R.drawable.main_timer_icon),
+//                        contentDescription = "Timer",
+//                        modifier = Modifier.size(14.dp)
+//                    )
+//                }
+//            }
+        
+        Spacer(modifier = Modifier.width(16.dp))
+        
+        // Start 버튼 (오른쪽)
+        Button(
+            onClick = onStartClick,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF1799BE),
+                contentColor = EarlyBirdTheme.colors.white,
+            ),
+            shape = RoundedCornerShape(28.dp),
+            contentPadding = PaddingValues(0.dp),
+            modifier = Modifier
+                .width(57.dp)
+                .height(48.dp)
+        ) {
+            Text(
+                text = "Start",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+            )
         }
     }
 }
@@ -212,16 +332,17 @@ fun TodoListComponentPreview() {
     EarlyBirdComposeTheme {
         TodoListComponent(
             todoItems = listOf(
-                // 전화 예약 todo (시간 순서대로 표시됨)
+                // 전화 예약 todo (시간 순서대로 정렬되어 표시됨)
                 TodoItem(1, "Call doctor", reservedTime = "09:00 AM", hasCall = true),
-                TodoItem(2, "Call mom", reservedTime = "02:00 PM", hasCall = true),
-                TodoItem(3, "Meeting with client", reservedTime = "04:30 PM", hasCall = true),
+                TodoItem(2, "Meeting with client", reservedTime = "04:30 PM", hasCall = true),
+                TodoItem(3, "Call mom", reservedTime = "02:00 PM", hasCall = true),
+                TodoItem(4, "Early morning call", reservedTime = "07:30 AM", hasCall = true),
                 
                 // 일반 todo
-                TodoItem(4, "Read for 30 minutes", timerDuration = "30 min", hasTimer = true),
-                TodoItem(5, "Exercise for 20 minutes", timerDuration = "20 min", hasTimer = true),
-                TodoItem(6, "Write journal entry"),
-                TodoItem(7, "Grocery shopping")
+                TodoItem(5, "Read for 30 minutes", timerDuration = "30 min", hasTimer = true),
+                TodoItem(6, "Exercise for 20 minutes", timerDuration = "20 min", hasTimer = true),
+                TodoItem(7, "Write journal entry"),
+                TodoItem(8, "Grocery shopping")
             ),
             onStartClick = { /* Handle start click */ }
         )
