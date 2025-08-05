@@ -20,6 +20,7 @@ import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdTheme
 @Composable
 fun TodoTaskCard(
     todoTask: String,
+    basic: String,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -49,7 +50,7 @@ fun TodoTaskCard(
                     color = Color(0xFFFFF384)
                 )
                 Text(
-                    text = "같이 해보자!",
+                    text = basic,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = EarlyBirdTheme.colors.white

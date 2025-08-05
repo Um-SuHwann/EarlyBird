@@ -22,7 +22,6 @@ fun SwipeButton(
 ) {
     Box(
         modifier = modifier
-            .padding(bottom = 80.dp)
     ) {
         IconButton(
             onClick = onStartCall,

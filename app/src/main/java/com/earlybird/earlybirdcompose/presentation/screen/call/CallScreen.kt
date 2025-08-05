@@ -9,10 +9,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,28 +41,47 @@ import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdComposeTheme
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdTheme
 import kotlinx.coroutines.delay
 
+// 상수 정의
+private object CallScreenConstants {
+    const val TRANSITION_DELAY = 2000L
+    const val COUNTDOWN_START = 5
+    const val COUNTDOWN_STEP_DELAY = 1000L
+}
+
+// Call state enum
+private enum class CallState {
+    WAITING,     // Waiting for call
+    ANSWERED,    // Call answered (showing thanks message)
+    COUNTDOWN,   // Countdown in progress
+    FINISHED     // Countdown completed
+}
+
 @Composable
 fun CallScreen(
-    callerName: String = "얼리버드",
+    callerName: String = "EarlyBird",
     todoTask: String = "",
     durationMillis: Int,
-    onStartCall: () -> Unit = {}
+    onStartCall: () -> Unit = {},
+    onNotNow: () -> Unit
 ) {
-    var isCallStarted by remember { mutableStateOf(false) }
-    var countdown by remember { mutableIntStateOf(5) }
-    var isCountdownFinished by remember { mutableStateOf(false) }
-    var showCountdownText by remember { mutableStateOf(false) }
+    var callState by remember { mutableStateOf(CallState.WAITING) }
+    var countdown by remember { mutableIntStateOf(CallScreenConstants.COUNTDOWN_START) }
 
-    LaunchedEffect(isCallStarted) {
-        if (isCallStarted) {
-            delay(2000) // 이미지 바뀌고 2초 대기
-            showCountdownText = true
-            for (i in 5 downTo 1) {
-                countdown = i
-                delay(1000)
+    LaunchedEffect(callState) {
+        when (callState) {
+            CallState.ANSWERED -> {
+                delay(CallScreenConstants.TRANSITION_DELAY)
+                callState = CallState.COUNTDOWN
             }
-            isCountdownFinished = true
-            onStartCall()
+            CallState.COUNTDOWN -> {
+                for (i in CallScreenConstants.COUNTDOWN_START downTo 1) {
+                    countdown = i
+                    delay(CallScreenConstants.COUNTDOWN_STEP_DELAY)
+                }
+                callState = CallState.FINISHED
+                onStartCall()
+            }
+            else -> { /* No action needed */ }
         }
     }
     Box(
@@ -84,7 +106,8 @@ fun CallScreen(
             Spacer(modifier = Modifier.height(20.dp))
             TodoTaskCard(
                 modifier = Modifier,
-                todoTask = todoTask
+                todoTask = todoTask,
+                basic = "Ready for this? Let's go"
             )
         }
         Box(
@@ -93,16 +116,16 @@ fun CallScreen(
                 .padding(top = 224.dp),
             contentAlignment = Alignment.TopCenter
         ) {
-            when {
-                !isCallStarted -> {
+            when (callState) {
+                CallState.WAITING -> {
                     Image(
                         modifier = Modifier.width(218.dp),
                         painter = painterResource(R.drawable.call_bird_calling_icon),
                         contentScale = ContentScale.Fit,
-                        contentDescription = "새 이미지"
+                        contentDescription = "Calling bird icon"
                     )
                 }
-                !showCountdownText -> {
+                CallState.ANSWERED -> {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
@@ -110,21 +133,22 @@ fun CallScreen(
                             modifier = Modifier.width(218.dp),
                             painter = painterResource(R.drawable.call_bird_called_icon),
                             contentScale = ContentScale.Fit,
-                            contentDescription = "새 이미지"
+                            contentDescription = "Bird answered call icon"
                         )
-                        Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(modifier = Modifier.height(32.dp))
                         Text(
-                            text = "전화받아줘서 고마워!\n이미 절반은 성공한거야",
-                            fontSize = 25.sp,
+                            text = "Thanks for picking up! \uD83D\uDC23\nYou're already halfway there\uD83D\uDC4F",
+                            fontSize = 23.sp,
                             color = EarlyBirdTheme.colors.white,
-                            fontWeight = FontWeight.Medium,
+                            fontWeight = FontWeight.Normal,
                             textAlign = TextAlign.Center
                         )
                     }
                 }
+                else -> { /* 카운트다운과 완료 상태에서는 이미지 숨김 */ }
             }
         }
-        if (showCountdownText && !isCountdownFinished){
+        if (callState == CallState.COUNTDOWN) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.align(Alignment.Center)
@@ -146,13 +170,37 @@ fun CallScreen(
             }
         }
         // 하단 스와이프 버튼 될 예정
-        if (!isCallStarted) {
-            SwipeButton(
-                onStartCall = {
-                    isCallStarted = true
-                },
-                modifier = Modifier.align(Alignment.BottomCenter)
-            )
+        if (callState == CallState.WAITING) {
+            Column (
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 33.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                SwipeButton(
+                    onStartCall = {
+                        callState = CallState.ANSWERED
+                    },
+                    modifier = Modifier
+                )
+                Spacer(Modifier.height(28.dp))
+                Button(
+                    onClick = onNotNow,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = EarlyBirdTheme.colors.white,
+                        contentColor = EarlyBirdTheme.colors.black
+                    ),
+                    modifier = Modifier
+                ) {
+                    Text(
+                        text = "Not now",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+            }
         }
     }
 }
@@ -161,6 +209,9 @@ fun CallScreen(
 @Composable
 fun CallScreenPreview() {
     EarlyBirdComposeTheme {
-        CallScreen(durationMillis = 2*60*1000)
+        CallScreen(
+            durationMillis = 2*60*1000,
+            onNotNow = {}
+        )
     }
 }

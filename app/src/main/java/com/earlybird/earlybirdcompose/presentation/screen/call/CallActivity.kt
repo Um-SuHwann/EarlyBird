@@ -1,5 +1,6 @@
 package com.earlybird.earlybirdcompose.presentation.screen.call
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -7,6 +8,7 @@ import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import com.earlybird.earlybirdcompose.MainActivity
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdComposeTheme
 
 class CallActivity : ComponentActivity() {
@@ -37,11 +39,18 @@ class CallActivity : ComponentActivity() {
                     onStartCall = {
                         com.earlybird.earlybirdcompose.util.checkPermission(
                             context = this,
-                            content = "우와! 우리가 해냈다\n다음에도 같이 하자!",
-                            buttonContent = "완료!",
+                            content = "Woohoo! We made it\nCan't wait to try again \uD83D\uDC23",
+                            buttonContent = "Done",
                             durationMillis = durationMillis,
                             isFinished = false
                         )
+                        finish()
+                    },
+                    onNotNow = {
+                        val intent = android.content.Intent(this, MainActivity::class.java).apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                        }
+                        startActivity(intent)
                         finish()
                     }
                 )
