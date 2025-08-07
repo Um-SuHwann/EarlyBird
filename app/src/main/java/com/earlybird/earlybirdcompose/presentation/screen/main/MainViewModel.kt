@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.earlybird.earlybirdcompose.data.entity.TodoEntity
 import com.earlybird.earlybirdcompose.data.repository.TodoRepository
 import com.earlybird.earlybirdcompose.presentation.screen.main.component.TodoItem
+import com.earlybird.earlybirdcompose.presentation.screen.main.component.TodoStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -77,6 +78,13 @@ class MainViewModel @Inject constructor(
     }
     
     suspend fun getTodoById(todoId: Int) = todoRepository.getTodoById(todoId)
+    
+    // 데이터베이스 기반 상태 업데이트
+    fun updateTodoStatus(todoId: Int, status: TodoStatus) {
+        viewModelScope.launch {
+            todoRepository.updateTodoStatus(todoId, status.ordinal)
+        }
+    }
 }
 
 data class MainUiState(
@@ -87,6 +95,12 @@ data class MainUiState(
 
 // Extension function to convert TodoEntity to TodoItem
 private fun TodoEntity.toTodoItem(): TodoItem {
+    val statusFromDb = when (this.status) {
+        1 -> TodoStatus.IN_PROGRESS
+        2 -> TodoStatus.COMPLETED
+        else -> TodoStatus.NOT_STARTED
+    }
+    
     return TodoItem(
         id = this.id,
         text = this.taskContent,
@@ -97,6 +111,7 @@ private fun TodoEntity.toTodoItem(): TodoItem {
         },
         timerDuration = this.timerDurationMinutes?.let { "${it}min" },
         hasTimer = this.timerDurationMinutes != null,
-        hasCall = this.hasCallReminder
+        hasCall = this.hasCallReminder,
+        status = statusFromDb // 데이터베이스에서 가져온 상태 사용
     )
 }

@@ -42,13 +42,20 @@ import com.earlybird.earlybirdcompose.R
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdComposeTheme
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdTheme
 
+enum class TodoStatus {
+    NOT_STARTED,  // 시작 전 - "Start" 버튼
+    IN_PROGRESS,  // 진행 중 - "Done" 버튼  
+    COMPLETED     // 완료 - 완료 아이콘
+}
+
 data class TodoItem(
     val id: Int,
     val text: String,
     val reservedTime: String? = null, // 예약 시간 (예: "09:00 AM")
     val timerDuration: String? = null, // 타이머 시간 (예: "2min")
     val hasTimer: Boolean = false, // 타이머 설정 여부
-    val hasCall: Boolean = false // 전화 기능 여부
+    val hasCall: Boolean = false, // 전화 기능 여부
+    val status: TodoStatus = TodoStatus.NOT_STARTED // 할일 상태
 )
 
 // 시간을 24시간 형식의 분 단위로 변환하는 함수
@@ -227,24 +234,66 @@ private fun TimelineTodoItemRow(
             fontWeight = FontWeight.Bold,
             color = Color(0xFF0E0E0E)
         )
-        // Start 버튼 (오른쪽)
-        Button(
-            onClick = onStartClick,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF1799BE),
-                contentColor = EarlyBirdTheme.colors.white,
-            ),
-            shape = RoundedCornerShape(28.dp),
-            contentPadding = PaddingValues(0.dp),
-            modifier = Modifier
-                .width(57.dp)
-                .height(48.dp)
-        ) {
-            Text(
-                text = "Start",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-            )
+        // 상태에 따른 버튼/아이콘 표시
+        when (todoItem.status) {
+            TodoStatus.NOT_STARTED -> {
+                Button(
+                    onClick = onStartClick,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF1799BE),
+                        contentColor = EarlyBirdTheme.colors.white,
+                    ),
+                    shape = RoundedCornerShape(28.dp),
+                    contentPadding = PaddingValues(0.dp),
+                    modifier = Modifier
+                        .width(57.dp)
+                        .height(48.dp)
+                ) {
+                    Text(
+                        text = "Start",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            }
+            TodoStatus.IN_PROGRESS -> {
+                Button(
+                    onClick = onStartClick,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF4CAF50),
+                        contentColor = EarlyBirdTheme.colors.white,
+                    ),
+                    shape = RoundedCornerShape(28.dp),
+                    contentPadding = PaddingValues(0.dp),
+                    modifier = Modifier
+                        .width(57.dp)
+                        .height(48.dp)
+                ) {
+                    Text(
+                        text = "Done",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            }
+            TodoStatus.COMPLETED -> {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .background(
+                            color = Color(0xFF4CAF50),
+                            shape = CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "✓",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+            }
         }
     }
 }
@@ -304,24 +353,66 @@ private fun RegularTodoItemRow(
         
         Spacer(modifier = Modifier.width(16.dp))
         
-        // Start 버튼 (오른쪽)
-        Button(
-            onClick = onStartClick,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF1799BE),
-                contentColor = EarlyBirdTheme.colors.white,
-            ),
-            shape = RoundedCornerShape(28.dp),
-            contentPadding = PaddingValues(0.dp),
-            modifier = Modifier
-                .width(57.dp)
-                .height(48.dp)
-        ) {
-            Text(
-                text = "Start",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-            )
+        // 상태에 따른 버튼/아이콘 표시
+        when (todoItem.status) {
+            TodoStatus.NOT_STARTED -> {
+                Button(
+                    onClick = onStartClick,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF1799BE),
+                        contentColor = EarlyBirdTheme.colors.white,
+                    ),
+                    shape = RoundedCornerShape(28.dp),
+                    contentPadding = PaddingValues(0.dp),
+                    modifier = Modifier
+                        .width(57.dp)
+                        .height(48.dp)
+                ) {
+                    Text(
+                        text = "Start",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            }
+            TodoStatus.IN_PROGRESS -> {
+                Button(
+                    onClick = onStartClick,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF4CAF50),
+                        contentColor = EarlyBirdTheme.colors.white,
+                    ),
+                    shape = RoundedCornerShape(28.dp),
+                    contentPadding = PaddingValues(0.dp),
+                    modifier = Modifier
+                        .width(57.dp)
+                        .height(48.dp)
+                ) {
+                    Text(
+                        text = "Done",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            }
+            TodoStatus.COMPLETED -> {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .background(
+                            color = Color(0xFF4CAF50),
+                            shape = CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "✓",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+            }
         }
     }
 }

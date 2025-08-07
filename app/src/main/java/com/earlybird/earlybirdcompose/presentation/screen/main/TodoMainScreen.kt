@@ -2,21 +2,16 @@ package com.earlybird.earlybirdcompose.presentation.screen.main
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -36,6 +31,7 @@ import com.earlybird.earlybirdcompose.presentation.screen.main.component.DateCom
 import com.earlybird.earlybirdcompose.presentation.screen.main.component.ModeToggleComponent
 import com.earlybird.earlybirdcompose.presentation.screen.main.component.SpeechBubbleComponent
 import com.earlybird.earlybirdcompose.presentation.screen.main.component.TodoListComponent
+import com.earlybird.earlybirdcompose.presentation.screen.main.component.TodoStatus
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdComposeTheme
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdTheme
 
@@ -92,9 +88,22 @@ fun MainScreen(
             ){
                 TodoListComponent(
                     todoItems = uiState.todoItems,
+                    //start 버튼 눌렀을 때
                     onStartClick = { todoItem ->
-                        // Handle todo item start click
-                        viewModel.markTodoAsCompleted(todoItem.id)
+                        when (todoItem.status) {
+                            TodoStatus.NOT_STARTED -> {
+                                viewModel.updateTodoStatus(todoItem.id, TodoStatus.IN_PROGRESS)
+                                // 여기서 타이머나 집중 세션을 시작할 수도 있음
+                            }
+                            TodoStatus.IN_PROGRESS -> {
+                                // Done 버튼 클릭 → 완료 처리
+                                viewModel.updateTodoStatus(todoItem.id, TodoStatus.COMPLETED)
+//                                viewModel.markTodoAsCompleted(todoItem.id)
+                            }
+                            TodoStatus.COMPLETED -> {
+                                // 완료 상태에서는 클릭 무시
+                            }
+                        }
                     },
                     modifier = Modifier.padding(top = 24.dp)
                 )
@@ -118,89 +127,8 @@ fun MainScreen(
                 contentScale = ContentScale.Fit
             )
         }
-
-//        Column(
-//            verticalArrangement = Arrangement.spacedBy(20.dp),
-//            modifier = Modifier
-//                .align(Alignment.BottomCenter)
-//        ) {
-//            Surface(
-//                color = EarlyBirdTheme.colors.white,
-//                shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp, bottomStart = 0.dp, bottomEnd = 0.dp),
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//            ) {
-//                Column(
-//                    verticalArrangement = Arrangement.spacedBy(16.dp),
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(horizontal = 20.dp, vertical = 20.dp)
-//                ) {
-//                    MainActionButton(
-//                        text = "원하는 시간에 시작하기 >",
-//                        backgroundColor = Color(0xFF0FA7CE),
-//                        textColor = EarlyBirdTheme.colors.white,
-//                        iconColor = EarlyBirdTheme.colors.mainBlue,
-//                        onClick = onSelectTimeClick
-//                    )
-//                    MainActionButton(
-//                        text = "지금 당장 시작하기 >",
-//                        backgroundColor = Color.White,
-//                        textColor = EarlyBirdTheme.colors.mainBlue,
-//                        iconColor = EarlyBirdTheme.colors.white,
-//                        onClick = {
-//                            //TimerScreen은 백그라운드 작업 또는 시스템 오버레이를 위해 사용되기 때문에 Navigation을 사용못함
-//                            checkPermission(
-//                                context = context,
-//                                content = "우와! 우리가 해냈다\n다음에도 같이 하자!",
-//                                buttonContent = "완료!",
-//                                durationMillis = 2 * 60 * 1000,
-//                                isFinished = false
-//                            )
-//                        }
-//                    )
-//                }
-//            }
-//        }
     }
 }
-
-//@Composable
-//fun MainActionButton(
-//    text: String,
-//    backgroundColor: Color,
-//    textColor: Color,
-//    iconColor: Color,
-//    onClick: () -> Unit,
-//    modifier: Modifier = Modifier
-//) {
-//    Button(
-//        onClick = onClick,
-//        modifier = modifier
-//            .fillMaxWidth()
-//            .height(150.dp),
-//        shape = RoundedCornerShape(20.dp),
-//        colors = ButtonDefaults.buttonColors(
-//            containerColor = backgroundColor,
-//            contentColor = textColor
-//        ),
-//        elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
-//    ) {
-//        Row(
-//            modifier = Modifier.fillMaxWidth(),
-//            verticalAlignment = Alignment.CenterVertically,
-//            horizontalArrangement = Arrangement.Center
-//        ) {
-//            Text(
-//                text = text,
-//                fontSize = 26.sp,
-//                fontWeight = FontWeight.Bold,
-//                color = textColor
-//            )
-//        }
-//    }
-//}
-
 
 @Preview(showBackground = true)
 @Composable

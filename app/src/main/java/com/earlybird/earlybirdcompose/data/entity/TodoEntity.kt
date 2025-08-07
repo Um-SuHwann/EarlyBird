@@ -36,7 +36,10 @@ data class TodoEntity(
     // 알림이 울릴 날짜 (향후 사용)
     val scheduledDate: Long? = null,
     
-    // 추가 상태 필드들
+    // 할일 상태 (0: NOT_STARTED, 1: IN_PROGRESS, 2: COMPLETED)
+    val status: Int = 0,
+    
+    // 추가 상태 필드들 (하위 호환성을 위해 유지)
     val isCompleted: Boolean = false,
     val completedAt: Long? = null
 )

@@ -36,6 +36,9 @@ class TodoRepository @Inject constructor(
     suspend fun updateMoodResponse(id: Int, mood: Int) = 
         todoDao.updateMoodResponse(id, mood)
     
+    suspend fun updateTodoStatus(id: Int, status: Int) = 
+        todoDao.updateTodoStatus(id, status)
+    
     suspend fun deleteCompletedTodos() = todoDao.deleteCompletedTodos()
     
     // 편의 메서드들

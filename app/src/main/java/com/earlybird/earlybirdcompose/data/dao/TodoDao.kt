@@ -40,6 +40,9 @@ interface TodoDao {
     @Query("UPDATE todos SET moodResponse = :mood WHERE id = :id")
     suspend fun updateMoodResponse(id: Int, mood: Int)
     
+    @Query("UPDATE todos SET status = :status WHERE id = :id")
+    suspend fun updateTodoStatus(id: Int, status: Int)
+    
     @Query("DELETE FROM todos WHERE isCompleted = 1")
     suspend fun deleteCompletedTodos()
 }

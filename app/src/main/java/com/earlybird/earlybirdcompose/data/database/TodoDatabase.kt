@@ -9,7 +9,7 @@ import com.earlybird.earlybirdcompose.data.entity.TodoEntity
 
 @Database(
     entities = [TodoEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class TodoDatabase : RoomDatabase() {
