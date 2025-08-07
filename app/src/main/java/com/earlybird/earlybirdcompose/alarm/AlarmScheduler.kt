@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Build
 import android.util.Log
 import com.earlybird.earlybirdcompose.data.model.AlarmInfo
+import com.earlybird.earlybirdcompose.data.entity.TodoEntity
 import java.util.Calendar
 
 object AlarmScheduler {
@@ -66,6 +67,45 @@ object AlarmScheduler {
             )
         }
     }
+    
+    // 데이터베이스 기반 알람 스케줄링 (새로운 메소드)
+    fun scheduleAlarmFromTodo(
+        context: Context,
+        todo: TodoEntity
+    ) {
+        if (todo.reminderTime == null || !todo.hasCallReminder) return
+        
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        
+        val requestCode = AlarmType.generateRequestCode(todo.id)
+        
+        val intent = Intent(context, AlarmReceiver::class.java).apply {
+            putExtra("todoId", todo.id)
+            putExtra("requestCode", requestCode)
+        }
+
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            requestCode,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        ///실질적으로 알람 매니저에 알람을 등록하는 곳입니다.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                todo.reminderTime,
+                pendingIntent
+            )
+        } else {
+            alarmManager.setExact(
+                AlarmManager.RTC_WAKEUP,
+                todo.reminderTime,
+                pendingIntent
+            )
+        }
+    }
 
     fun cancelAlarm(
         context: Context,
@@ -80,5 +120,17 @@ object AlarmScheduler {
         )
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         alarmManager.cancel(pendingIntent)
+        
+        Log.d("Alarm", "알람 취소 - requestCode: $requestCode")
+    }
+    
+    // 데이터베이스 기반 개별 알람 취소
+    fun cancelAlarmFromTodo(
+        context: Context,
+        todoId: Int
+    ) {
+        val requestCode = AlarmType.generateRequestCode(todoId)
+        cancelAlarm(context, requestCode)
+        Log.d("Alarm", "데이터베이스 기반 알람 취소 - todoId: $todoId")
     }
 }

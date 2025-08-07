@@ -40,10 +40,11 @@ class MainViewModel @Inject constructor(
         isRepeating: Boolean = false,
         repeatPattern: String? = null,
         hasVibration: Boolean = false,
-        scheduledDate: Long? = null
+        scheduledDate: Long? = null,
+        onTodoCreated: ((Long) -> Unit)? = null // 생성된 todoId를 받기 위한 콜백
     ) {
         viewModelScope.launch {
-            todoRepository.createTodo(
+            val todoId = todoRepository.createTodo(
                 taskContent = taskContent,
                 timerDurationMinutes = timerDurationMinutes,
                 reminderTime = reminderTime,
@@ -53,6 +54,7 @@ class MainViewModel @Inject constructor(
                 hasVibration = hasVibration,
                 scheduledDate = scheduledDate
             )
+            onTodoCreated?.invoke(todoId)
         }
     }
     
@@ -73,6 +75,8 @@ class MainViewModel @Inject constructor(
             todoRepository.updateMoodResponse(todoId, mood)
         }
     }
+    
+    suspend fun getTodoById(todoId: Int) = todoRepository.getTodoById(todoId)
 }
 
 data class MainUiState(

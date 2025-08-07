@@ -25,6 +25,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -35,6 +37,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewModelScope
 import com.earlybird.earlybirdcompose.R
 import com.earlybird.earlybirdcompose.alarm.AlarmScheduler
 import com.earlybird.earlybirdcompose.alarm.AlarmType
@@ -49,6 +52,7 @@ import com.earlybird.earlybirdcompose.presentation.screen.reservation.component.
 import com.earlybird.earlybirdcompose.presentation.screen.main.MainViewModel
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdComposeTheme
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdTheme
+import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
@@ -62,7 +66,7 @@ fun ReservationScreen(
 ) {
     //할일 입력 및 알람 설정 정보들
     var todoText by remember { mutableStateOf("") }
-    var isRepeating by remember { mutableStateOf(true) }
+    var isRepeating by remember { mutableStateOf(false) }
     var isVibrationEnabled by remember { mutableStateOf(true) }
 
     //새로운 상태들
@@ -175,7 +179,6 @@ fun ReservationScreen(
                                 isVibrationEnabled = isVibrationEnabled,
                                 mainViewModel = mainViewModel,
                                 context = context,
-                                onSaveAlarm = onSaveAlarm,
                                 onBackClick = onBackClick,
                                 onNavigateToTimer = onNavigateToTimer
                             )
@@ -214,23 +217,9 @@ private fun saveTodoAndAlarm(
     isVibrationEnabled: Boolean,
     mainViewModel: MainViewModel,
     context: android.content.Context,
-    onSaveAlarm: (AlarmInfo) -> Unit,
     onBackClick: () -> Unit,
     onNavigateToTimer: (String, String, Int) -> Unit
 ) {
-    // Call 기능이 활성화된 경우에만 알람 설정
-    val alarmInfo = if (featureState.isCallEnabled) {
-        AlarmInfo(
-            todo = todoText,
-            hour = featureState.selectedCallHour,
-            minute = featureState.selectedCallMinute,
-            amPm = featureState.selectedCallAmPm,
-            isRepeating = isRepeating,
-            isVibrationEnabled = isVibrationEnabled,
-            focusDurationMinutes = if (featureState.isTimerEnabled) featureState.selectedTimerMinutes else 0
-        )
-    } else null
-
     // Room Database에 Todo 저장
     mainViewModel.addTodo(
         taskContent = todoText,
@@ -253,33 +242,33 @@ private fun saveTodoAndAlarm(
         hasCallReminder = featureState.isCallEnabled,
         isRepeating = isRepeating,
         hasVibration = isVibrationEnabled,
-        scheduledDate = System.currentTimeMillis()
+        scheduledDate = System.currentTimeMillis(),
+        onTodoCreated = { todoId ->
+            // 데이터베이스에 저장된 후 알람 설정
+            if (featureState.isCallEnabled) {
+                // 생성된 todoId로 TodoEntity 조회해서 알람 스케줄링
+                mainViewModel.viewModelScope.launch {
+                    val todo = mainViewModel.getTodoById(todoId.toInt())
+                    if (todo != null) {
+                        AlarmScheduler.scheduleAlarmFromTodo(context, todo)
+                        
+                        val (hoursLeft, minutesLeft) = calculateRemainingTime(
+                            featureState.selectedCallHour,
+                            featureState.selectedCallMinute,
+                            featureState.selectedCallAmPm
+                        )
+                        val message = "I will remind you\nafter ${hoursLeft} : ${minutesLeft} later"
+                        
+                        // 알람 예약 완료 화면으로 이동
+                        onNavigateToTimer(message, "Okay!", 0)
+                    }
+                }
+            } else {
+                // Call 기능이 없는 경우 바로 완료 처리
+                onBackClick()
+            }
+        }
     )
-
-    // 알람 설정 (Call 기능이 활성화된 경우에만)
-    if (alarmInfo != null) {
-        onSaveAlarm(alarmInfo)
-        val (hoursLeft, minutesLeft) = calculateRemainingTime(
-            featureState.selectedCallHour,
-            featureState.selectedCallMinute,
-            featureState.selectedCallAmPm
-        )
-        AlarmScheduler.scheduleAlarm(
-            context = context,
-            alarmType = AlarmType.USER,
-            alarmInfo = alarmInfo,
-        )
-        val message = "I will remind you\nafter ${hoursLeft} : ${minutesLeft} later"
-        //알람을 실제로 저장하는 곳
-        onNavigateToTimer(
-            message,
-            "Okay!",
-            0
-        )
-    } else {
-        //Call 기능이 없는 경우 바로 완료 처리
-        onBackClick() // 메인 화면으로 돌아가기
-    }
 }
 
 fun calculateRemainingTime(hour: Int, minute: Int, amPm: String): Pair<Int, Int> {
