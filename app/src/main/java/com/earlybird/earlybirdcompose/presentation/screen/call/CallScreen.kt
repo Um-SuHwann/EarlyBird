@@ -161,8 +161,8 @@ fun CallScreen(
                 )
                 Spacer(modifier = Modifier.height(85.dp)) // 숫자와 텍스트 사이 간격
                 Text(
-                    text = "${countdown}초 뒤에 같이 시작하러 가는거야!\n설마 안하진 않겠지?",
-                    fontSize = 25.sp,
+                    text = "Starting in ${countdown} sec\n" + "don’t even think about\nskipping \uD83D\uDE0F",
+                    fontSize = 23.sp,
                     color = Color.White,
                     fontWeight = FontWeight.Medium,
                     textAlign = TextAlign.Center

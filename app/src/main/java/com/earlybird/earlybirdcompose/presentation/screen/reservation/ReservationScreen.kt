@@ -163,7 +163,7 @@ fun ReservationScreen(
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
             }
-            Spacer(modifier = Modifier.height(110.dp))
+            Spacer(modifier = Modifier.height(40.dp))
             if(selectedMood != null){
                 Button(
                     onClick = {
@@ -172,18 +172,21 @@ fun ReservationScreen(
                                 currentStep = 2
                             }
                         } else {
-                            saveTodoAndAlarm(
-                                todoText = todoText,
-                                featureState = featureState,
-                                isRepeating = isRepeating,
-                                isVibrationEnabled = isVibrationEnabled,
-                                mainViewModel = mainViewModel,
-                                context = context,
-                                onBackClick = onBackClick,
-                                onNavigateToTimer = onNavigateToTimer
-                            )
+                            if (todoText.trim().isNotEmpty()) {
+                                saveTodoAndAlarm(
+                                    todoText = todoText.trim(),
+                                    featureState = featureState,
+                                    isRepeating = isRepeating,
+                                    isVibrationEnabled = isVibrationEnabled,
+                                    mainViewModel = mainViewModel,
+                                    context = context,
+                                    onBackClick = onBackClick,
+                                    onNavigateToTimer = onNavigateToTimer
+                                )
+                            }
                         }
                     },
+                    enabled = if (currentStep == 1) selectedMood != null else todoText.trim().isNotEmpty(),
                     modifier = Modifier
                         .width(216.dp)
                         .height(40.dp)

@@ -13,3 +13,12 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Keystore files (sensitive information)
+*.keystore
+*.jks
+app/*.keystore
+app/*.jks
+
+# Signing properties with passwords
+gradle.properties

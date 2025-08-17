@@ -61,12 +61,10 @@ fun TimePickerDialog(
                     
                     Text(":", fontSize = 24.sp, fontWeight = FontWeight.Bold)
                     
-                    // Minute selector
-                    NumberSelector(
+                    // Minute selector (15분 단위)
+                    MinuteSelector(
                         value = currentMinute,
-                        range = 0..59,
-                        onValueChange = { currentMinute = it },
-                        formatter = { "%02d".format(it) }
+                        onValueChange = { currentMinute = it }
                     )
                     
                     Spacer(modifier = Modifier.width(8.dp))
@@ -150,6 +148,68 @@ fun TimePickerDialog(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun MinuteSelector(
+    value: Int,
+    onValueChange: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val minuteOptions = listOf(0, 15, 30, 45)
+    val currentIndex = minuteOptions.indexOf(value).takeIf { it >= 0 } ?: 0
+    
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        // Up button
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .background(Color(0xFFF5F5F5))
+                .clickable { 
+                    val newIndex = (currentIndex + 1) % minuteOptions.size
+                    onValueChange(minuteOptions[newIndex])
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            Text("▲", fontSize = 12.sp, color = EarlyBirdTheme.colors.fontBlack)
+        }
+        
+        // Current value
+        Box(
+            modifier = Modifier
+                .width(48.dp)
+                .height(40.dp)
+                .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(8.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "%02d".format(minuteOptions[currentIndex]),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Medium,
+                color = EarlyBirdTheme.colors.fontBlack
+            )
+        }
+        
+        // Down button
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .background(Color(0xFFF5F5F5))
+                .clickable { 
+                    val newIndex = (currentIndex - 1 + minuteOptions.size) % minuteOptions.size
+                    onValueChange(minuteOptions[newIndex])
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            Text("▼", fontSize = 12.sp, color = EarlyBirdTheme.colors.fontBlack)
         }
     }
 }

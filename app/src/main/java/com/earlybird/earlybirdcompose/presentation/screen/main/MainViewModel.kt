@@ -1,5 +1,6 @@
 package com.earlybird.earlybirdcompose.presentation.screen.main
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.earlybird.earlybirdcompose.data.entity.TodoEntity
@@ -7,20 +8,56 @@ import com.earlybird.earlybirdcompose.data.repository.TodoRepository
 import com.earlybird.earlybirdcompose.presentation.screen.main.component.TodoItem
 import com.earlybird.earlybirdcompose.presentation.screen.main.component.TodoStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val todoRepository: TodoRepository
+    private val todoRepository: TodoRepository,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow(MainUiState())
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
     
+    private val sharedPrefs = context.getSharedPreferences("day_streak", Context.MODE_PRIVATE)
+    
     init {
         loadTodos()
+        updateDayStreak()
+    }
+    
+    private fun updateDayStreak() {
+        val today = LocalDate.now().toString()
+        val lastVisitDate = sharedPrefs.getString("last_visit_date", "")
+        val currentStreak = sharedPrefs.getInt("day_streak", 0)
+        
+        if (lastVisitDate != today) {
+            // 오늘 첫 방문
+            val newStreak = if (lastVisitDate == LocalDate.now().minusDays(1).toString()) {
+                // 연속 방문
+                currentStreak + 1
+            } else if (lastVisitDate!!.isEmpty()) {
+                // 첫 방문
+                1
+            } else {
+                // 연속 방문 끊김
+                1
+            }
+            
+            sharedPrefs.edit()
+                .putString("last_visit_date", today)
+                .putInt("day_streak", newStreak)
+                .apply()
+                
+            _uiState.value = _uiState.value.copy(dayStreak = newStreak)
+        } else {
+            // 오늘 이미 방문한 경우
+            _uiState.value = _uiState.value.copy(dayStreak = currentStreak)
+        }
     }
     
     private fun loadTodos() {
@@ -85,10 +122,18 @@ class MainViewModel @Inject constructor(
             todoRepository.updateTodoStatus(todoId, status.ordinal)
         }
     }
+    
+    // Todo 리스트 초기화 (모든 Todo 삭제)
+    fun clearAllTodos() {
+        viewModelScope.launch {
+            todoRepository.deleteAllTodos()
+        }
+    }
 }
 
 data class MainUiState(
     val todoItems: List<TodoItem> = emptyList(),
+    val dayStreak: Int = 1,
     val isLoading: Boolean = false,
     val errorMessage: String? = null
 )

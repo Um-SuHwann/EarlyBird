@@ -21,7 +21,10 @@ fun NavGraphBuilder.mainGraph(
     composable("simple_main"){
         SimpleMainScreen(
             onStartTimer = {
-
+//                val content = "Woohoo! We made it\nCan't wait to try again \uD83D\uDC23"
+//                val buttonContent = "Done"
+//                val durationMillis = 2 * 1000 * 60
+//                navController.navigate("timer_overlay/$content/$buttonContent/$durationMillis")
             },
             onGoToTodoMain = {
                 navController.navigate("main")

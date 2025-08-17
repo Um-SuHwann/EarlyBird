@@ -12,13 +12,22 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.earlybird.earlybirdcompose"
+        applicationId = "com.suhwan.earlybird_test"
         minSdk = 26
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        targetSdk = 35
+        versionCode = 12
+        versionName = "2.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        create("release") {
+            keyAlias = project.findProperty("KEY_ALIAS") as String? ?: "androidkey"
+            keyPassword = project.findProperty("KEY_PASSWORD") as String? ?: "zmxncbv0804@"
+            storeFile = file(project.findProperty("KEYSTORE_FILE") as String? ?: "C:\\AndroidKeyStorePath\\key.jks")
+            storePassword = project.findProperty("KEYSTORE_PASSWORD") as String? ?: "zmxncbv0804@"
+        }
     }
 
     buildTypes {
@@ -28,6 +37,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {

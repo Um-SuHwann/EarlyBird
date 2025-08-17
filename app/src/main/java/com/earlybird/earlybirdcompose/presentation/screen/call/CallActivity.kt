@@ -27,7 +27,7 @@ class CallActivity : ComponentActivity() {
         }
         window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD)
         val todoTask = intent.getStringExtra("todoTask").let {
-            if (it.isNullOrBlank()) "할 일을" else it
+            if (it.isNullOrBlank()) "" else it
         }
         val durationMillis = intent.getIntExtra("durationMillis", 2).let { it * 60 * 1000 }
         Log.d("call", "$durationMillis")
@@ -47,7 +47,7 @@ class CallActivity : ComponentActivity() {
                         finish()
                     },
                     onNotNow = {
-                        val intent = android.content.Intent(this, MainActivity::class.java).apply {
+                        val intent = Intent(this, MainActivity::class.java).apply {
                             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
                         }
                         startActivity(intent)

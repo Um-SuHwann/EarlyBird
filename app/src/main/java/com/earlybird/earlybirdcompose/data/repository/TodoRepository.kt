@@ -41,6 +41,8 @@ class TodoRepository @Inject constructor(
     
     suspend fun deleteCompletedTodos() = todoDao.deleteCompletedTodos()
     
+    suspend fun deleteAllTodos() = todoDao.deleteAllTodos()
+    
     // 편의 메서드들
     suspend fun createTodo(
         taskContent: String,

@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.earlybird.earlybirdcompose.R
 import com.earlybird.earlybirdcompose.presentation.screen.main.component.BirdImageComponent
@@ -55,7 +56,7 @@ fun MainScreen(
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .padding(start = 20.dp, top = 20.dp),
-            dayStreak = 5
+            dayStreak = uiState.dayStreak
         )
 
         // 오른쪽 상단 - Mode Toggle
@@ -73,7 +74,7 @@ fun MainScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             BirdImageComponent(
-                dayStreak = 5,
+                dayStreak = uiState.dayStreak,
                 modifier = Modifier
             )
             SpeechBubbleComponent(
@@ -109,6 +110,23 @@ fun MainScreen(
                 )
             }
         }
+        
+//        // Clear All Button (개발/테스트 용도)
+//        FloatingActionButton(
+//            onClick = { viewModel.clearAllTodos() },
+//            modifier = Modifier
+//                .align(Alignment.BottomStart)
+//                .padding(30.dp)
+//                .size(48.dp),
+//            containerColor = Color(0xFFE53E3E),
+//            shape = CircleShape
+//        ) {
+//            androidx.compose.material3.Text(
+//                text = "✕",
+//                color = Color.White,
+//                fontSize = 20.sp
+//            )
+//        }
         
         // FloatingActionButton for adding todo
         FloatingActionButton(

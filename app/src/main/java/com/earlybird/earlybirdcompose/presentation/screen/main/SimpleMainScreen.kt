@@ -20,6 +20,9 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -42,8 +45,10 @@ fun SimpleMainScreen(
     onStartTimer: () -> Unit = {},
     onGoToTodoMain: () -> Unit = {},
     nextCallTime: Long? = null,
-    nextCallTodoTitle: String? = null
+    nextCallTodoTitle: String? = null,
+    viewModel: MainViewModel = hiltViewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
     val backgroundColor = EarlyBirdTheme.colors.white
     Box(
         modifier = Modifier
@@ -56,7 +61,7 @@ fun SimpleMainScreen(
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .padding(start = 20.dp, top = 20.dp),
-            dayStreak = 5
+            dayStreak = uiState.dayStreak
         )
         
         // 오른쪽 상단 - Mode Toggle

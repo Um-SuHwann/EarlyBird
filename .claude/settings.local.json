@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(find:*)",
+      "Bash(powershell:*)",
+      "Bash(rm:*)",
+      "Bash(git checkout:*)",
+      "Bash(.gradlew clean build)"
+    ],
+    "deny": []
+  }
+}
