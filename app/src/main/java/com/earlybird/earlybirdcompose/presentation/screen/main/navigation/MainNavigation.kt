@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import com.earlybird.earlybirdcompose.presentation.screen.call.CallActivity
 import com.earlybird.earlybirdcompose.presentation.screen.main.MainScreen
 import com.earlybird.earlybirdcompose.presentation.screen.main.SimpleMainScreen
 
@@ -15,6 +16,16 @@ fun NavGraphBuilder.mainGraph(
         MainScreen(
             onAddTodoClick = {
                 navController.navigate("reservation")
+            },
+            onCallClick = { todoItem ->
+                // CallActivity로 이동 (Intent 사용)
+                val context = navController.context
+                val intent = Intent(context, CallActivity::class.java).apply {
+                    putExtra("todo_id", todoItem.id)
+                    putExtra("todo_task", todoItem.text)
+                    putExtra("timer_duration", todoItem.timerDuration)
+                }
+                context.startActivity(intent)
             }
         )
     }

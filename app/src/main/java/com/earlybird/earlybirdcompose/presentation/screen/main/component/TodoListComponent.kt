@@ -50,7 +50,7 @@ enum class TodoStatus {
 
 data class TodoItem(
     val id: Int,
-    val text: String,
+    val text: String, //할일
     val reservedTime: String? = null, // 예약 시간 (예: "09:00 AM")
     val timerDuration: String? = null, // 타이머 시간 (예: "2min")
     val hasTimer: Boolean = false, // 타이머 설정 여부
@@ -96,6 +96,7 @@ private fun parseTimeToMinutes(timeString: String): Int {
 fun TodoListComponent(
     todoItems: List<TodoItem>,
     onStartClick: (TodoItem) -> Unit,
+    onCallClick: (TodoItem) -> Unit, // 전화 예약 todo 클릭 시 호출
     modifier: Modifier = Modifier
 ) {
     // 전화 예약 todo와 일반 todo 분리
@@ -127,7 +128,8 @@ fun TodoListComponent(
                             todoItem = callTodos[index],
                             isFirst = index == 0,
                             isLast = index == callTodos.size - 1,
-                            onStartClick = { onStartClick(callTodos[index]) }
+                            onStartClick = { onCallClick(callTodos[index]) }, // 전화 예약은 onCallClick 사용
+                            onDoneClick = { onStartClick(callTodos[index]) } // Done 상태는 기존 로직 사용
                         )
                     }
                     
@@ -150,6 +152,9 @@ fun TodoListComponent(
                         )
                     }
                 }
+                item {
+                    Spacer(modifier = Modifier.height(96.dp))
+                }
             }
         }
     }
@@ -161,7 +166,8 @@ private fun TimelineTodoItemRow(
     todoItem: TodoItem,
     isFirst: Boolean,
     isLast: Boolean,
-    onStartClick: () -> Unit
+    onStartClick: () -> Unit, // Start 버튼 (전화 실행)
+    onDoneClick: () -> Unit   // Done 버튼 (완료 처리)
 ) {
     Row(
         modifier = Modifier
@@ -435,7 +441,8 @@ fun TodoListComponentPreview() {
                 TodoItem(7, "Write journal entry"),
                 TodoItem(8, "Grocery shopping")
             ),
-            onStartClick = { /* Handle start click */ }
+            onStartClick = { /* Handle start click */ },
+            onCallClick = { /* Handle call click */ }
         )
     }
 }

@@ -66,9 +66,9 @@ class  AlarmReceiver : BroadcastReceiver(){
                                 Intent.FLAG_ACTIVITY_CLEAR_TOP or
                                 Intent.FLAG_ACTIVITY_SINGLE_TOP)
                         // 데이터베이스에서 가져온 실제 할일 내용 전달
-                        putExtra("todoTask", todo.taskContent)
+                        putExtra("todo_task", todo.taskContent)
                         // 집중 시간 전달 (기본값 2분)
-                        putExtra("durationMillis", todo.timerDurationMinutes ?: 2)
+                        putExtra("timer_duration", todo.timerDurationMinutes ?: 2)
                     }
                     context.startActivity(callIntent)
 

@@ -33,6 +33,7 @@ import com.earlybird.earlybirdcompose.presentation.screen.main.component.BirdIma
 import com.earlybird.earlybirdcompose.presentation.screen.main.component.DateComponent
 import com.earlybird.earlybirdcompose.presentation.screen.main.component.ModeToggleComponent
 import com.earlybird.earlybirdcompose.presentation.screen.main.component.SpeechBubbleComponent
+import com.earlybird.earlybirdcompose.presentation.screen.main.component.TodoItem
 import com.earlybird.earlybirdcompose.presentation.screen.main.component.TodoListComponent
 import com.earlybird.earlybirdcompose.presentation.screen.main.component.TodoStatus
 import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdComposeTheme
@@ -42,6 +43,7 @@ import com.earlybird.earlybirdcompose.ui.theme.EarlyBirdTheme
 fun MainScreen(
     onModeToggle: () -> Unit = {},
     onAddTodoClick: () -> Unit = {},
+    onCallClick: (TodoItem) -> Unit = {}, // CallScreen으로 이동하는 콜백 추가
     viewModel: MainViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -105,6 +107,23 @@ fun MainScreen(
                             }
                             TodoStatus.IN_PROGRESS -> {
                                 // Done 버튼 클릭 → 완료 처리
+                                viewModel.updateTodoStatus(todoItem.id, TodoStatus.COMPLETED)
+                            }
+                            TodoStatus.COMPLETED -> {
+                                // 완료 상태에서는 클릭 무시
+                            }
+                        }
+                    },
+                    //전화 예약 todo start 버튼 눌렀을 때 (CallScreen 이동)
+                    onCallClick = { todoItem ->
+                        when (todoItem.status) {
+                            TodoStatus.NOT_STARTED -> {
+                                // CallScreen으로 이동
+                                onCallClick(todoItem)
+                                viewModel.updateTodoStatus(todoItem.id, TodoStatus.IN_PROGRESS)
+                            }
+                            TodoStatus.IN_PROGRESS -> {
+                                // 이미 진행 중인 전화 todo는 Done 버튼으로 완료 처리됨
                                 viewModel.updateTodoStatus(todoItem.id, TodoStatus.COMPLETED)
                             }
                             TodoStatus.COMPLETED -> {

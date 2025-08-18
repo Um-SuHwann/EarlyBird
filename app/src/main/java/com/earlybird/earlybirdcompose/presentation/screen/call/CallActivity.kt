@@ -26,10 +26,10 @@ class CallActivity : ComponentActivity() {
             )
         }
         window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD)
-        val todoTask = intent.getStringExtra("todoTask").let {
-            if (it.isNullOrBlank()) "" else it
-        }
-        val durationMillis = intent.getIntExtra("durationMillis", 2).let { it * 60 * 1000 }
+        // 새로운 Intent extra들로 수정
+        val todoId = intent.getIntExtra("todo_id", -1)
+        val todoTask = intent.getStringExtra("todo_task") ?: intent.getStringExtra("todoTask") ?: ""
+        val durationMillis = intent.getIntExtra("timer_duration", 2).let { it * 60 * 1000 }
         Log.d("call", "$durationMillis")
         setContent {
             EarlyBirdComposeTheme {
