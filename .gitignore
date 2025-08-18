@@ -22,3 +22,6 @@ app/*.jks
 
 # Signing properties with passwords
 gradle.properties
+
+# Kotlin build cache
+.kotlin/

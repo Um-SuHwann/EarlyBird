@@ -5,6 +5,7 @@ plugins {
     id("kotlin-parcelize")
     id("com.google.devtools.ksp")
     id("dagger.hilt.android.plugin")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -15,14 +16,15 @@ android {
         applicationId = "com.suhwan.earlybird_test"
         minSdk = 26
         targetSdk = 35
-        versionCode = 12
-        versionName = "2.0.2"
+        versionCode = 13
+        versionName = "2.0.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     signingConfigs {
-        create("release") {
+        create(
+            "release") {
             keyAlias = project.findProperty("KEY_ALIAS") as String? ?: "androidkey"
             keyPassword = project.findProperty("KEY_PASSWORD") as String? ?: "zmxncbv0804@"
             storeFile = file(project.findProperty("KEYSTORE_FILE") as String? ?: "C:\\AndroidKeyStorePath\\key.jks")
@@ -69,6 +71,11 @@ dependencies {
     implementation("com.google.dagger:hilt-android:$hilt_version")
     ksp("com.google.dagger:hilt-android-compiler:$hilt_version")
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
+    
+    // Firebase dependencies
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+    implementation("com.google.firebase:firebase-analytics-ktx")
+    // implementation("com.google.firebase:firebase-crashlytics-ktx") // 일단 제거
     
     implementation("com.android.billingclient:billing-ktx:8.0.0")
     implementation("androidx.lifecycle:lifecycle-runtime:2.9.1")

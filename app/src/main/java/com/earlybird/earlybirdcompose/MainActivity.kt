@@ -31,19 +31,25 @@ const val REQUEST_CODE_OVERLAY_PERMISSION = 1001
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        try {
+            super.onCreate(savedInstanceState)
 
-        val startIntent = intent
+            enableEdgeToEdge()
 
-        if (!checkOverlayPermission(this)) {
-            requestOverlayPermission(this)
-        }
+            val startIntent = intent
 
-        setContent {
-            EarlyBirdComposeTheme {
-                AppNavigation(startIntent)
+            if (!checkOverlayPermission(this)) {
+                requestOverlayPermission(this)
             }
+
+            setContent {
+                EarlyBirdComposeTheme {
+                    AppNavigation(startIntent)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error in onCreate", e)
+            throw e
         }
     }
 

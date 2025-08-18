@@ -20,6 +20,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -50,6 +51,11 @@ fun SimpleMainScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val backgroundColor = EarlyBirdTheme.colors.white
+    
+    // Screen view 트래킹
+    LaunchedEffect(Unit) {
+        viewModel.logScreenView("SimpleMainScreen", "SimpleMainScreen")
+    }
     Box(
         modifier = Modifier
             .fillMaxSize()

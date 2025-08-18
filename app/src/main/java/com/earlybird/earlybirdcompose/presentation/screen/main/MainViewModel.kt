@@ -1,8 +1,10 @@
 package com.earlybird.earlybirdcompose.presentation.screen.main
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.earlybird.earlybirdcompose.analytics.AnalyticsHelper
 import com.earlybird.earlybirdcompose.data.entity.TodoEntity
 import com.earlybird.earlybirdcompose.data.repository.TodoRepository
 import com.earlybird.earlybirdcompose.presentation.screen.main.component.TodoItem
@@ -17,7 +19,8 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val todoRepository: TodoRepository,
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val analyticsHelper: AnalyticsHelper
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow(MainUiState())
@@ -26,8 +29,13 @@ class MainViewModel @Inject constructor(
     private val sharedPrefs = context.getSharedPreferences("day_streak", Context.MODE_PRIVATE)
     
     init {
-        loadTodos()
-        updateDayStreak()
+        try {
+            loadTodos()
+            updateDayStreak()
+            Log.d("MainViewModel", "MainViewModel initialization completed")
+        } catch (e: Exception) {
+            Log.e("MainViewModel", "Error during initialization", e)
+        }
     }
     
     private fun updateDayStreak() {
@@ -52,6 +60,10 @@ class MainViewModel @Inject constructor(
                 .putString("last_visit_date", today)
                 .putInt("day_streak", newStreak)
                 .apply()
+                
+            // Day streak 이벤트 로깅
+            val isNewRecord = newStreak > currentStreak
+            analyticsHelper.logDayStreakUpdated(newStreak, isNewRecord)
                 
             _uiState.value = _uiState.value.copy(dayStreak = newStreak)
         } else {
@@ -92,6 +104,11 @@ class MainViewModel @Inject constructor(
                 hasVibration = hasVibration,
                 scheduledDate = scheduledDate
             )
+            // Todo 생성 이벤트 로깅
+            analyticsHelper.logTodoCreated(
+                hasCall = hasCallReminder
+            )
+            
             onTodoCreated?.invoke(todoId)
         }
     }
@@ -120,6 +137,11 @@ class MainViewModel @Inject constructor(
     fun updateTodoStatus(todoId: Int, status: TodoStatus) {
         viewModelScope.launch {
             todoRepository.updateTodoStatus(todoId, status.ordinal)
+            
+            // Todo 완료 시 이벤트 로깅
+            if (status == TodoStatus.COMPLETED) {
+                analyticsHelper.logTodoCompleted(todoId, System.currentTimeMillis())
+            }
         }
     }
     
@@ -128,6 +150,16 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             todoRepository.deleteAllTodos()
         }
+    }
+    
+    // 스크린 뷰 트래킹
+    fun logScreenView(screenName: String, screenClass: String) {
+        analyticsHelper.logScreenView(screenName, screenClass)
+    }
+    
+    // 모드 전환 트래킹
+    fun logModeToggle(fromMode: String, toMode: String) {
+        analyticsHelper.logModeToggle(fromMode, toMode)
     }
 }
 

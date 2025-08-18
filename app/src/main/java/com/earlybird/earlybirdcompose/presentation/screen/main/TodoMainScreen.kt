@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -45,6 +47,11 @@ fun MainScreen(
     val context = LocalContext.current
     val backgroundColor = EarlyBirdTheme.colors.white
     val uiState by viewModel.uiState.collectAsState()
+    
+    // Screen view 트래킹
+    LaunchedEffect(Unit) {
+        viewModel.logScreenView("TodoMainScreen", "MainScreen")
+    }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -99,7 +106,6 @@ fun MainScreen(
                             TodoStatus.IN_PROGRESS -> {
                                 // Done 버튼 클릭 → 완료 처리
                                 viewModel.updateTodoStatus(todoItem.id, TodoStatus.COMPLETED)
-//                                viewModel.markTodoAsCompleted(todoItem.id)
                             }
                             TodoStatus.COMPLETED -> {
                                 // 완료 상태에서는 클릭 무시
@@ -111,22 +117,22 @@ fun MainScreen(
             }
         }
         
-//        // Clear All Button (개발/테스트 용도)
-//        FloatingActionButton(
-//            onClick = { viewModel.clearAllTodos() },
-//            modifier = Modifier
-//                .align(Alignment.BottomStart)
-//                .padding(30.dp)
-//                .size(48.dp),
-//            containerColor = Color(0xFFE53E3E),
-//            shape = CircleShape
-//        ) {
-//            androidx.compose.material3.Text(
-//                text = "✕",
-//                color = Color.White,
-//                fontSize = 20.sp
-//            )
-//        }
+        // Clear All Button (개발/테스트 용도)
+        FloatingActionButton(
+            onClick = { viewModel.clearAllTodos() },
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(30.dp)
+                .size(48.dp),
+            containerColor = Color(0xFFE53E3E),
+            shape = CircleShape
+        ) {
+            Text(
+                text = "✕",
+                color = Color.White,
+                fontSize = 20.sp
+            )
+        }
         
         // FloatingActionButton for adding todo
         FloatingActionButton(
